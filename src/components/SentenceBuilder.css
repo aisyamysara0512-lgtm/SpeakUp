@@ -1,0 +1,96 @@
+/* Sentence Builder component styling */
+.sentence-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: var(--bg-card);
+  border-radius: 24px;
+  border: 1.5px solid var(--border-soft);
+  box-shadow: var(--shadow-md);
+}
+
+.sb-title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--color-navy);
+  text-align: center;
+}
+
+.sb-tiles-pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  justify-content: center;
+}
+
+.sb-tile {
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  font-weight: 800;
+  border-radius: 9999px;
+  background: var(--color-teal-light);
+  border: 1.5px solid var(--color-teal-border);
+  color: var(--color-navy);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sb-tile img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.sb-selected-area {
+  min-height: 3rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.8rem;
+  background: var(--bg-canvas);
+  border-radius: 12px;
+  border: 1.5px dashed var(--border-soft);
+}
+
+.sb-selected-tile {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--color-teal-light);
+  padding: 0.4rem 0.6rem;
+  border-radius: 12px;
+}
+
+.sb-tile-controls button {
+  background: transparent;
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin: 0 0.1rem;
+}
+
+.sb-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-help {
+  background: var(--color-sky-light);
+  border: 1.5px solid var(--color-sky-border);
+  color: var(--color-navy);
+  font-weight: 800;
+}
+
+.sb-feedback {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-navy);
+}

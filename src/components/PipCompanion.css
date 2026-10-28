@@ -1,0 +1,339 @@
+/* ==========================================================================
+   PIP THE PARROT COMPANION - STYLING & ANIMATIONS
+   --------------------------------------------------------------------------
+   This file controls Pip's size, animations (blinking, listening head tilt,
+   speaking bob, celebrating jump, resting), and the speech bubble.
+   ========================================================================== */
+
+:root {
+  --pip-primary: var(--color-sky-soft);
+  --pip-accent: var(--color-yellow-strong);
+  --pip-bubble-bg: #ffffff;
+  --pip-bubble-border: var(--border-soft);
+  --pip-bubble-shadow: rgba(27, 47, 78, 0.08);
+}
+
+/* Container for Pip and his speech bubble */
+.pip-companion-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.25rem;
+  position: relative;
+  user-select: none;
+}
+
+.pip-companion-container.vertical {
+  flex-direction: column;
+  text-align: center;
+}
+
+/* ==========================================================================
+   PIP AVATAR SIZES
+   Modify width/height below to adjust Pip's size on different screens
+   ========================================================================== */
+.pip-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pip-wrapper:hover {
+  transform: scale(1.05);
+}
+
+.pip-wrapper.size-sm { width: 64px; height: 64px; }
+.pip-wrapper.size-md { width: 100px; height: 100px; }
+.pip-wrapper.size-lg { width: 140px; height: 140px; }
+.pip-wrapper.size-hero { width: 180px; height: 180px; }
+
+/* Pip's 3D image */
+.pip-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(27, 47, 78, 0.12));
+  transform-origin: center bottom;
+  transition: all 0.4s ease;
+}
+
+/* Glow backdrop for Pip */
+.pip-glow {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(254, 240, 138, 0.45) 0%, rgba(124, 198, 242, 0.15) 70%, transparent 100%);
+  z-index: 0;
+  pointer-events: none;
+  animation: pip-glow-pulse 3s infinite ease-in-out;
+}
+
+/* ==========================================================================
+   STATE ANIMATIONS
+   ========================================================================== */
+
+/* 1. IDLE: Natural gentle breathing and occasional subtle sway */
+.pip-state-idle .pip-image {
+  animation: pip-idle-breathe 3.5s infinite ease-in-out;
+}
+
+@keyframes pip-idle-breathe {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translateY(-4px) rotate(1deg) scale(1.02);
+  }
+}
+
+@keyframes pip-glow-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 0.9; }
+}
+
+/* 2. LISTENING: Head tilts inquisitively towards mic, glowing audio ripple */
+.pip-state-listening .pip-image {
+  animation: pip-listen-tilt 1.8s infinite ease-in-out;
+  filter: drop-shadow(0 8px 20px rgba(124, 198, 242, 0.45));
+}
+
+@keyframes pip-listen-tilt {
+  0%, 100% {
+    transform: translateY(-2px) rotate(8deg) scale(1.04);
+  }
+  50% {
+    transform: translateY(-6px) rotate(12deg) scale(1.06);
+  }
+}
+
+/* Sound wave rings around Pip when listening */
+.pip-sound-waves {
+  position: absolute;
+  inset: -15px;
+  border-radius: 50%;
+  border: 3px solid rgba(124, 198, 242, 0.6);
+  pointer-events: none;
+  animation: sound-ripple 1.5s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.pip-sound-waves::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 2px dashed rgba(245, 174, 10, 0.5);
+  animation: sound-ripple 1.5s infinite 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes sound-ripple {
+  0% { transform: scale(0.85); opacity: 1; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+/* 3. SPEAKING: Rhythmic bobbing as if Pip is vocalizing or mimicking */
+.pip-state-speaking .pip-image {
+  animation: pip-speak-bob 0.45s infinite ease-in-out alternate;
+}
+
+@keyframes pip-speak-bob {
+  0% {
+    transform: translateY(0) scaleY(0.97) scaleX(1.02);
+  }
+  100% {
+    transform: translateY(-8px) scaleY(1.04) scaleX(0.98);
+  }
+}
+
+/* 4. CELEBRATING: Joyful high bounce with celebratory wiggle */
+.pip-state-celebrating .pip-image {
+  animation: pip-celebrate 0.65s infinite cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  filter: drop-shadow(0 12px 24px rgba(245, 174, 10, 0.5));
+}
+
+@keyframes pip-celebrate {
+  0%, 100% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  30% {
+    transform: translateY(-16px) scale(1.1) rotate(-8deg);
+  }
+  60% {
+    transform: translateY(-12px) scale(1.08) rotate(8deg);
+  }
+}
+
+/* 5. TRY-AGAIN: Gentle reassuring tilt and warm nudge */
+.pip-state-try-again .pip-image {
+  animation: pip-try-again-bob 1.6s infinite ease-in-out;
+  filter: drop-shadow(0 8px 18px rgba(245, 174, 10, 0.35));
+}
+
+@keyframes pip-try-again-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(-4deg); }
+}
+
+/* Sparkles for celebration */
+.pip-celebrate-sparkles {
+  position: absolute;
+  top: -15px;
+  display: flex;
+  gap: 1.5rem;
+  font-size: 1.4rem;
+  pointer-events: none;
+  animation: sparkle-float 1.2s infinite ease-in-out;
+}
+
+@keyframes sparkle-float {
+  0%, 100% { transform: translateY(0) scale(0.9); opacity: 0.8; }
+  50% { transform: translateY(-8px) scale(1.2); opacity: 1; }
+}
+
+/* 5. RESTING: Settles down cozily, slow soothing breath at session completion */
+.pip-state-resting .pip-image {
+  animation: pip-resting-breathe 4s infinite ease-in-out;
+  filter: brightness(0.95) drop-shadow(0 4px 10px rgba(27, 47, 78, 0.08));
+}
+
+@keyframes pip-resting-breathe {
+  0%, 100% {
+    transform: translateY(2px) scale(0.96) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(4px) scale(0.94) rotate(0deg);
+  }
+}
+
+/* Zzz indicator when resting */
+.pip-zzz {
+  position: absolute;
+  top: -12px;
+  right: -8px;
+  font-weight: 900;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  animation: zzz-float 2.5s infinite ease-in-out;
+}
+
+@keyframes zzz-float {
+  0% { transform: translate(0, 0) scale(0.8); opacity: 0; }
+  40% { opacity: 1; }
+  100% { transform: translate(8px, -14px) scale(1.2); opacity: 0; }
+}
+
+/* ==========================================================================
+   SPEECH BUBBLE
+   Displays Pip's prompts, encouragement, and advice
+   ========================================================================== */
+.pip-speech-bubble {
+  position: relative;
+  background: var(--pip-bubble-bg);
+  border: 2px solid var(--pip-bubble-border);
+  padding: 0.9rem 1.4rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px var(--pip-bubble-shadow);
+  max-width: 320px;
+  font-family: 'Nunito', sans-serif;
+  z-index: 5;
+  animation: bubble-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes bubble-pop {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Tail pointing to Pip (horizontal left-tail) */
+.pip-speech-bubble::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 10px solid var(--pip-bubble-bg);
+  z-index: 2;
+}
+
+.pip-speech-bubble::after {
+  content: '';
+  position: absolute;
+  left: -13px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 12px solid var(--pip-bubble-border);
+  z-index: 1;
+}
+
+/* Vertical top-tail if placed under Pip */
+.pip-companion-container.vertical .pip-speech-bubble::before {
+  left: 50%;
+  top: -10px;
+  transform: translateX(-50%);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 10px solid var(--pip-bubble-bg);
+  border-top: none;
+}
+
+.pip-companion-container.vertical .pip-speech-bubble::after {
+  left: 50%;
+  top: -13px;
+  transform: translateX(-50%);
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 12px solid var(--pip-bubble-border);
+  border-top: none;
+}
+
+.pip-bubble-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--pip-accent);
+  margin-bottom: 0.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pip-bubble-text {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Interactive click-me badge */
+.pip-tap-hint {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: var(--pip-accent);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(27, 47, 78,0.15);
+  pointer-events: none;
+  animation: bounce-hint 2s infinite;
+}
+
+@keyframes bounce-hint {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}

@@ -1,0 +1,192 @@
+/* ==========================================================================
+   SPEAKUP THEME — "PIP PALETTE"  (single source of truth for colour)
+   --------------------------------------------------------------------------
+   Inspired by Pip, the colourful baby parrot: sky-blue feathers, a sunny
+   yellow + peach crest and a rainbow chest.
+
+   COLOUR HIERARCHY
+   1. Primary brand ........ TEAL    – primary buttons, active nav, key accents
+   2. Structure ............ NAVY    – headings, body text, sidebar, structure
+   3. Reward / highlight ... YELLOW  – stars, badges, progress, Pip details
+   4. Warm interaction ..... CORAL   – secondary CTAs, selected states, notices
+   5. Background ........... CREAM / IVORY + pale tints
+   6. Supporting ........... SKY BLUE, LEAFY GREEN, LAVENDER, PEACH
+
+   CONTRAST RULES
+   - White text is only placed on teal, navy, teal-strong, sky (strong) and
+     coral-strong. Yellow, coral, peach, lavender and all tints use NAVY text.
+   - "*-hover" / "*-deep" tokens are the readable text tones for each hue
+     when shown on its own pale tint.
+
+   Edit colours HERE only. Every other stylesheet references these tokens.
+   ========================================================================== */
+
+:root {
+  /* ---------- 1. TEAL — primary brand ---------- */
+  --color-teal: #0B847F;          /* white text 4.5:1 */
+  --color-teal-hover: #096B67;    /* text on teal tint, hover state */
+  --color-teal-strong: #076560;
+  --color-teal-light: #DDF3F1;
+  --color-teal-soft: #9ED9D3;
+  --color-teal-border: rgba(11, 132, 127, 0.28);
+
+  /* ---------- 2. NAVY — structure ---------- */
+  --color-navy: #1B2F4E;
+  --color-navy-dark: #12213A;
+  --color-navy-muted: #55657E;    /* secondary text, 5.7:1 on cream */
+  --color-navy-light: #8592A6;    /* decorative / disabled only */
+  --color-navy-tint: #E8ECF3;
+
+  /* ---------- 3. YELLOW — rewards & highlights ---------- */
+  --color-yellow: #FFC83D;
+  --color-yellow-strong: #F5AE0A;
+  --color-yellow-deep: #7A5200;   /* text on yellow tint */
+  --color-yellow-light: #FFF4D1;
+  --color-yellow-border: rgba(245, 174, 10, 0.4);
+
+  /* ---------- 4. CORAL — warm interaction ---------- */
+  --color-coral: #FF7A5C;         /* fills & borders (navy text on top) */
+  --color-coral-strong: #B9432A;  /* white text / readable coral text */
+  --color-coral-light: #FFE9E2;
+  --color-coral-border: rgba(255, 122, 92, 0.38);
+
+  /* ---------- 5. BACKGROUNDS — cream & ivory ---------- */
+  --bg-canvas: #FFF9F0;           /* warm cream page background */
+  --bg-canvas-subtle: #FBF1E3;
+  --bg-card: #FFFDF8;             /* ivory cards */
+  --bg-surface-elevated: #FFFFFF;
+  --border-soft: #F0E4D2;
+  --border-strong: #DCCBB2;
+  --border-focus: var(--color-teal);
+
+  /* ---------- 6. SUPPORTING COLOURS ---------- */
+  /* Sky blue — calm sections, learning cards (Pip's feathers) */
+  --color-sky-soft: #7CC6F2;
+  --color-sky: #1F78B4;           /* white text 4.7:1, readable as text */
+  --color-sky-hover: #17639A;
+  --color-sky-light: #E6F4FD;
+  --color-sky-border: rgba(31, 120, 180, 0.25);
+
+  /* Leafy green — success, nature, Sound Garden */
+  --color-green: #4CB86A;
+  --color-green-hover: #2C7A43;   /* success text */
+  --color-green-light: #E5F6EA;
+  --color-green-border: rgba(76, 184, 106, 0.35);
+
+  /* Lavender — occasional variety, special rewards, story elements */
+  --color-lavender: #B8A6E8;
+  --color-lavender-deep: #5E4AA6;
+  --color-lavender-light: #F1EDFB;
+  --color-lavender-border: rgba(184, 166, 232, 0.5);
+
+  /* Peach — gentle decoration */
+  --color-peach: #FFB89A;
+  --color-peach-deep: #9A4A26;
+  --color-peach-light: #FFF0E8;
+
+  /* ---------- SEMANTIC ROLES ---------- */
+  --brand-primary: var(--color-teal);
+  --brand-structure: var(--color-navy);
+  --brand-reward: var(--color-yellow);
+  --brand-accent: var(--color-coral);
+
+  --text-main: var(--color-navy);
+  --text-muted: var(--color-navy-muted);
+  --text-subtle: var(--color-navy-light);
+  --text-on-brand: #FFFFFF;
+
+  --success-bg: var(--color-green-light);
+  --success-text: var(--color-green-hover);
+  --success-border: var(--color-green-border);
+  --hint-bg: var(--color-yellow-light);
+  --hint-text: var(--color-yellow-deep);
+  --hint-border: var(--color-yellow-border);
+  --notice-bg: var(--color-coral-light);
+  --notice-text: var(--color-coral-strong);
+  --notice-border: var(--color-coral-border);
+
+  /* ---------- GRADIENTS ---------- */
+  --gradient-teal: linear-gradient(135deg, var(--color-teal) 0%, var(--color-teal-strong) 100%);
+  --gradient-coral: linear-gradient(135deg, #FF8F70 0%, var(--color-coral) 100%);
+  --gradient-sun: linear-gradient(135deg, #FFD766 0%, var(--color-yellow) 100%);
+  --gradient-sky: linear-gradient(135deg, var(--color-sky-light) 0%, #CFEAFB 100%);
+  --gradient-pip: linear-gradient(135deg, var(--color-sky-light) 0%, var(--color-yellow-light) 55%, var(--color-peach-light) 100%);
+
+  /* ---------- ELEVATION (navy-tinted, never pure black) ---------- */
+  --shadow-sm: 0 2px 6px rgba(27, 47, 78, 0.05);
+  --shadow-md: 0 8px 24px rgba(27, 47, 78, 0.07);
+  --shadow-lg: 0 16px 36px rgba(27, 47, 78, 0.1);
+  --shadow-hover: 0 14px 30px rgba(11, 132, 127, 0.18);
+  --shadow-teal: 0 6px 18px rgba(11, 132, 127, 0.28);
+  --shadow-coral: 0 6px 18px rgba(255, 122, 92, 0.32);
+  --shadow-yellow: 0 6px 18px rgba(245, 174, 10, 0.3);
+  --overlay: rgba(18, 33, 58, 0.6);
+
+  /* ---------- BACKWARD-COMPATIBLE ALIASES ----------
+     Older code refers to these names. They now point at the Pip palette
+     so existing screens adopt the new scheme automatically. */
+  --color-amber: var(--color-yellow);
+  --color-amber-hover: var(--color-yellow-deep);
+  --color-amber-light: var(--color-yellow-light);
+  --color-amber-border: var(--color-yellow-border);
+  --color-coral-hover: var(--color-coral-strong);
+
+  --c-teal: var(--color-teal);
+  --c-teal-light: var(--color-teal-light);
+  --c-teal-hover: var(--color-teal-hover);
+  --c-coral: var(--color-coral);
+  --c-coral-light: var(--color-coral-light);
+  --c-coral-hover: var(--color-coral-strong);
+  --c-amber: var(--color-yellow);
+  --c-amber-light: var(--color-yellow-light);
+  --c-amber-hover: var(--color-yellow-deep);
+  --c-indigo: var(--color-sky);
+  --c-indigo-light: var(--color-sky-light);
+  --c-indigo-hover: var(--color-sky-hover);
+  --c-lavender: var(--color-lavender-deep);
+  --c-lavender-light: var(--color-lavender-light);
+  --c-lavender-hover: var(--color-lavender-deep);
+  --c-mustard: var(--color-yellow);
+  --c-mustard-light: var(--color-yellow-light);
+  --c-mustard-hover: var(--color-yellow-deep);
+  --c-olive: var(--color-green);
+  --c-olive-light: var(--color-green-light);
+  --c-olive-hover: var(--color-green-hover);
+  --c-rose: var(--color-coral);
+  --c-rose-light: var(--color-coral-light);
+  --c-rose-hover: var(--color-coral-strong);
+  --c-brown: var(--color-navy);
+  --c-brown-light: var(--bg-canvas-subtle);
+  --c-brown-hover: var(--color-navy-dark);
+  --bg-main: var(--bg-canvas);
+  --gradient-purple: var(--gradient-teal);   /* legacy name, now teal */
+  --gradient-sunset: var(--gradient-coral);  /* legacy name, now coral */
+}
+
+/* ==========================================================================
+   ACCESSIBILITY MODES
+   ========================================================================== */
+
+/* High-contrast mode (toggled by adding .high-contrast to a container) */
+.high-contrast {
+  --color-navy-muted: #2A3A55;
+  --border-soft: #B9A88F;
+  --border-strong: #8C7A60;
+  --bg-canvas: #FFFFFF;
+  --bg-card: #FFFFFF;
+}
+
+/* Reduced motion: honour the OS setting, or the in-app .reduce-motion class */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
