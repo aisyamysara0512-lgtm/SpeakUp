@@ -5,8 +5,8 @@ import { soundEngine } from '../utils/soundEngine';
 
 /**
  * Helper Harbour: What Do I Need?
- * Functional communication & AAC-inspired practice
- * With clear visual error indication (❌), Retry button, and Pip's Hint
+ * Clean, spacious, kid-friendly scenario layout with 4 big picture cards,
+ * spoken model sentence, gentle Retry, Hint, and 1-click button to My Talking Board.
  */
 export default function WhatDoINeed({
   onBack = () => {},
@@ -27,7 +27,6 @@ export default function WhatDoINeed({
 
   const handleSelectChoice = (choice) => {
     setSelectedChoice(choice);
-    // Spoken vocabulary word immediately
     onPlayAudio(choice.label);
 
     if (choice.isCorrect) {
@@ -36,7 +35,6 @@ export default function WhatDoINeed({
       setShowHint(false);
       setPipState('celebrating');
       setPipMessage(`Pip says: "${current.modelSentence}" 🌟`);
-      // Then play the full model sentence with a slight delay
       setTimeout(() => {
         onPlayAudio(current.modelSentence);
       }, 700);
@@ -69,7 +67,7 @@ export default function WhatDoINeed({
     return (
       <ActivityShell
         title="Helper Harbour Complete!"
-        moduleName="Helper Harbour (What Do I Need?)"
+        moduleName="What Do I Need?"
         stepIndex={WHAT_DO_I_NEED_SCENARIOS.length}
         totalSteps={WHAT_DO_I_NEED_SCENARIOS.length}
         pipState="celebrating"
@@ -83,9 +81,9 @@ export default function WhatDoINeed({
             Helper Harbour Journey Complete!
           </h2>
           <p style={{ color: 'var(--color-navy-muted)', fontSize: '1.1rem', maxWidth: '500px', margin: '0 auto 2rem auto', fontWeight: 600 }}>
-            You practiced telling others what you need when you feel cold, thirsty, hungry, or need help from a trusted adult!
+            You practiced telling others what you need when you feel cold, thirsty, hungry, or need help!
           </p>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button className="btn-secondary" onClick={() => { setScenarioIndex(0); setFeedback(null); setShowHint(false); }}>
               🔄 Practice Again
             </button>
@@ -104,7 +102,7 @@ export default function WhatDoINeed({
   return (
     <ActivityShell
       title={current.title}
-      moduleName="Helper Harbour (Functional Communication)"
+      moduleName="What Do I Need?"
       stepIndex={scenarioIndex + 1}
       totalSteps={WHAT_DO_I_NEED_SCENARIOS.length}
       pipState={pipState}
@@ -116,7 +114,7 @@ export default function WhatDoINeed({
       hint={showHint ? current.hint : null}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        
+
         {/* Situation Header */}
         <div style={{
           background: 'var(--bg-canvas)',
@@ -134,7 +132,7 @@ export default function WhatDoINeed({
             textTransform: 'uppercase',
             letterSpacing: '1px'
           }}>
-            Situation {scenarioIndex + 1} of 7
+            Situation {scenarioIndex + 1} of {WHAT_DO_I_NEED_SCENARIOS.length}
           </span>
           <h3 style={{
             fontSize: '1.9rem',
@@ -149,7 +147,7 @@ export default function WhatDoINeed({
           </p>
         </div>
 
-        {/* 4 Picture + Label Choices */}
+        {/* 4 Big Picture + Label Choices */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
@@ -172,15 +170,15 @@ export default function WhatDoINeed({
                   padding: '1.8rem 1rem',
                   borderRadius: '24px',
                   cursor: 'pointer',
-                  border: isCorrect 
-                    ? '3px solid var(--color-green)' 
-                    : isWrong 
-                    ? '3px solid var(--color-coral)' 
+                  border: isCorrect
+                    ? '3px solid var(--color-green)'
+                    : isWrong
+                    ? '3px solid var(--color-coral)'
                     : '2px solid var(--border-soft)',
-                  background: isCorrect 
-                    ? 'var(--color-green-light)' 
-                    : isWrong 
-                    ? 'var(--color-coral-light)' 
+                  background: isCorrect
+                    ? 'var(--color-green-light)'
+                    : isWrong
+                    ? 'var(--color-coral-light)'
                     : 'var(--bg-card)',
                   boxShadow: isWrong ? '0 0 0 4px var(--color-coral-border)' : 'var(--shadow-sm)',
                   transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)'
@@ -206,7 +204,7 @@ export default function WhatDoINeed({
           </div>
         )}
 
-        {/* 2. EXPLICIT INCORRECT FEEDBACK WITH RETRY & HINT */}
+        {/* 2. GENTLE RETRY WITH HINT */}
         {feedback === 'retry' && (
           <div style={{
             width: '100%',
@@ -217,7 +215,7 @@ export default function WhatDoINeed({
             boxShadow: 'var(--shadow-md)'
           }}>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.2rem' }}>
-              <span style={{ fontSize: '2.5rem' }}>❌</span>
+              <span style={{ fontSize: '2.5rem' }}>💛</span>
               <div>
                 <h4 style={{ color: 'var(--color-coral-strong)', fontSize: '1.25rem', fontWeight: 900 }}>
                   "{selectedChoice?.label}" is not what you need right now
@@ -229,14 +227,14 @@ export default function WhatDoINeed({
             </div>
 
             <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
-              <button 
+              <button
                 className="btn-coral"
                 onClick={handleRetry}
                 style={{ padding: '0.7rem 1.4rem', fontSize: '0.95rem' }}
               >
                 🔄 Try Again
               </button>
-              <button 
+              <button
                 className="btn-secondary"
                 onClick={() => setShowHint(true)}
                 style={{ padding: '0.7rem 1.4rem', fontSize: '0.95rem', background: 'var(--color-yellow-light)', borderColor: 'var(--color-yellow-border)', color: 'var(--color-yellow-deep)' }}
@@ -265,7 +263,7 @@ export default function WhatDoINeed({
         {/* Action Controls */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <button className="btn-secondary" onClick={onOpenBoard}>
-            🧸 Open Talking Board (Free AAC)
+            🧸 Open My Talking Board (Free AAC)
           </button>
 
           {feedback === 'correct' && (

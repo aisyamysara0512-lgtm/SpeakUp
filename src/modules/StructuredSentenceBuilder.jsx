@@ -4,9 +4,9 @@ import { STRUCTURED_SENTENCE_BANK } from '../data/curriculumData';
 import { soundEngine } from '../utils/soundEngine';
 
 /**
- * 4-Part Structured Sentence Formulation Activity:
- * WHO? + DOES WHAT? + WHAT? + WITH WHAT?
- * Allows the learner to formulate, listen, clear, and save sentences.
+ * Clean, Kid-Friendly Structured Sentence Builder:
+ * WHO? + DOING? + WHAT? + (Optional: WITH WHAT? / WHY? / WHEN?)
+ * Zero cluttered setting bars—just big visual word cards and the assembled sentence box.
  */
 export default function StructuredSentenceBuilder({
   onBack = () => {},
@@ -19,19 +19,41 @@ export default function StructuredSentenceBuilder({
   const [selectedWhat, setSelectedWhat] = useState(null);
   const [selectedWith, setSelectedWith] = useState(null);
   const [savedList, setSavedList] = useState([]);
-  const [pipMessage, setPipMessage] = useState("Pick a card from each column to build your story sentence! 🧩");
+  const [pipMessage, setPipMessage] = useState("Pick a card from the columns below to build your sentence! 🧩");
   const [pipState, setPipState] = useState("idle");
+
+  const getConjugatedVerb = (whoItem, verbItem) => {
+    if (!verbItem) return '';
+    if (whoItem?.grammarPerson === 'third') {
+      return verbItem.thirdPerson || verbItem.label;
+    }
+    return verbItem.label;
+  };
+
+  const conjugatedVerb = getConjugatedVerb(selectedWho, selectedDoes);
 
   const assembledTokens = [
     selectedWho?.label,
-    selectedDoes?.label,
+    conjugatedVerb,
     selectedWhat?.label,
     selectedWith?.label
   ].filter(Boolean);
 
-  const fullSentence = assembledTokens.length > 0 
-    ? assembledTokens.join(' ') + '.' 
+  const fullSentence = assembledTokens.length > 0
+    ? assembledTokens.join(' ') + '.'
     : '';
+
+  const handleTapCard = (setter, currentItem, newItem, spokenWord) => {
+    // Tapping an already selected card unselects it (so 4th column is always optional!)
+    if (currentItem?.label === newItem.label) {
+      setter(null);
+      return;
+    }
+    setter(newItem);
+    onPlayAudio(spokenWord || newItem.label);
+    setPipState('speaking');
+    setPipMessage(`Added "${spokenWord || newItem.label}"! Tap Read Aloud when you're ready! 🗣️`);
+  };
 
   const handlePlay = () => {
     if (!fullSentence) return;
@@ -60,9 +82,14 @@ export default function StructuredSentenceBuilder({
     setPipMessage("Board cleared. Ready for a brand new sentence!");
   };
 
+  const fourthColumnItems = [
+    ...STRUCTURED_SENTENCE_BANK.withWhatOrToWhom.slice(0, 3),
+    ...STRUCTURED_SENTENCE_BANK.expansions.slice(0, 3)
+  ];
+
   return (
     <ActivityShell
-      title="Build a 4-Part Sentence"
+      title="Build a Sentence"
       moduleName="Sentence Treehouse"
       stepIndex={assembledTokens.length}
       totalSteps={4}
@@ -74,7 +101,7 @@ export default function StructuredSentenceBuilder({
       modelText={fullSentence}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        
+
         {/* Assembled Sentence Stage */}
         <div style={{
           background: 'var(--bg-canvas)',
@@ -96,12 +123,13 @@ export default function StructuredSentenceBuilder({
           <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             {assembledTokens.length === 0 ? (
               <span style={{ color: 'var(--color-navy-light)', fontSize: '1.2rem', fontWeight: 700 }}>
-                Tap cards below: Who? → Does what? → What? → With what?
+                Tap cards below: Who? → Doing? → What? → (Optional: Extra Part)
               </span>
             ) : (
               assembledTokens.map((token, idx) => (
-                <span 
+                <span
                   key={idx}
+                  onClick={() => onPlayAudio(token)}
                   style={{
                     background: 'var(--color-teal)',
                     color: '#fff',
@@ -109,7 +137,8 @@ export default function StructuredSentenceBuilder({
                     borderRadius: '9999px',
                     fontWeight: 800,
                     fontSize: '1.2rem',
-                    boxShadow: 'var(--shadow-teal)'
+                    boxShadow: 'var(--shadow-teal)',
+                    cursor: 'pointer'
                   }}
                 >
                   {token}
@@ -119,7 +148,7 @@ export default function StructuredSentenceBuilder({
           </div>
 
           {assembledTokens.length > 0 && (
-            <div style={{ display: 'flex', gap: '0.8rem', marginTop: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.8rem', marginTop: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
               <button className="btn-primary" onClick={handlePlay}>
                 🔊 Read Aloud
               </button>
@@ -133,7 +162,7 @@ export default function StructuredSentenceBuilder({
           )}
         </div>
 
-        {/* 4 Interactive Columns */}
+        {/* 4 Clean Interactive Columns */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
@@ -148,7 +177,7 @@ export default function StructuredSentenceBuilder({
               {STRUCTURED_SENTENCE_BANK.subjects.map(item => (
                 <button
                   key={item.label}
-                  onClick={() => setSelectedWho(item)}
+                  onClick={() => handleTapCard(setSelectedWho, selectedWho, item, item.label)}
                   style={{
                     padding: '0.7rem 0.9rem',
                     borderRadius: '14px',
@@ -169,33 +198,37 @@ export default function StructuredSentenceBuilder({
             </div>
           </div>
 
-          {/* Column 2: DOES WHAT */}
+          {/* Column 2: DOING */}
           <div className="card-panel" style={{ background: 'var(--bg-card)', padding: '1.2rem', borderRadius: '20px', border: '1.5px solid var(--border-soft)' }}>
             <h4 style={{ color: 'var(--color-coral-strong)', fontWeight: 900, marginBottom: '0.8rem', textAlign: 'center' }}>
               ⚡ 2. Doing?
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {STRUCTURED_SENTENCE_BANK.verbs.map(item => (
-                <button
-                  key={item.label}
-                  onClick={() => setSelectedDoes(item)}
-                  style={{
-                    padding: '0.7rem 0.9rem',
-                    borderRadius: '14px',
-                    border: selectedDoes?.label === item.label ? '2px solid var(--color-coral)' : '1px solid var(--border-soft)',
-                    background: selectedDoes?.label === item.label ? 'var(--color-coral-light)' : 'var(--bg-canvas)',
-                    color: 'var(--color-navy)',
-                    fontWeight: 800,
-                    fontSize: '0.95rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <span>{item.icon}</span> <span>{item.label}</span>
-                </button>
-              ))}
+              {STRUCTURED_SENTENCE_BANK.verbs.slice(0, 6).map(item => {
+                const verbText = getConjugatedVerb(selectedWho, item);
+                const isSelected = selectedDoes?.label === item.label;
+                return (
+                  <button
+                    key={item.label}
+                    onClick={() => handleTapCard(setSelectedDoes, selectedDoes, item, verbText)}
+                    style={{
+                      padding: '0.7rem 0.9rem',
+                      borderRadius: '14px',
+                      border: isSelected ? '2px solid var(--color-coral)' : '1px solid var(--border-soft)',
+                      background: isSelected ? 'var(--color-coral-light)' : 'var(--bg-canvas)',
+                      color: 'var(--color-navy)',
+                      fontWeight: 800,
+                      fontSize: '0.95rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <span>{item.icon}</span> <span>{verbText}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -205,10 +238,10 @@ export default function StructuredSentenceBuilder({
               🎯 3. What?
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {STRUCTURED_SENTENCE_BANK.objects.map(item => (
+              {STRUCTURED_SENTENCE_BANK.objects.slice(0, 6).map(item => (
                 <button
                   key={item.label}
-                  onClick={() => setSelectedWhat(item)}
+                  onClick={() => handleTapCard(setSelectedWhat, selectedWhat, item, item.label)}
                   style={{
                     padding: '0.7rem 0.9rem',
                     borderRadius: '14px',
@@ -229,16 +262,16 @@ export default function StructuredSentenceBuilder({
             </div>
           </div>
 
-          {/* Column 4: WITH WHAT */}
+          {/* Column 4: OPTIONAL EXTRA (With what / When / Because) */}
           <div className="card-panel" style={{ background: 'var(--bg-card)', padding: '1.2rem', borderRadius: '20px', border: '1.5px solid var(--border-soft)' }}>
             <h4 style={{ color: 'var(--color-green-hover)', fontWeight: 900, marginBottom: '0.8rem', textAlign: 'center' }}>
-              🛠️ 4. With what?
+              🛠️ 4. Extra (Optional)
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {STRUCTURED_SENTENCE_BANK.withWhat.map(item => (
+              {fourthColumnItems.map(item => (
                 <button
                   key={item.label}
-                  onClick={() => setSelectedWith(item)}
+                  onClick={() => handleTapCard(setSelectedWith, selectedWith, item, item.label)}
                   style={{
                     padding: '0.7rem 0.9rem',
                     borderRadius: '14px',
@@ -264,11 +297,11 @@ export default function StructuredSentenceBuilder({
         {savedList.length > 0 && (
           <div style={{ marginTop: '1rem' }}>
             <h4 style={{ fontWeight: 800, color: 'var(--color-navy)', marginBottom: '0.8rem' }}>
-              📝 Sentences You Formulated Today:
+              📝 Sentences You Built Today:
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               {savedList.map((sent, i) => (
-                <div 
+                <div
                   key={i}
                   style={{
                     display: 'flex',
@@ -281,8 +314,8 @@ export default function StructuredSentenceBuilder({
                   }}
                 >
                   <span style={{ fontWeight: 700, color: 'var(--color-navy)', fontSize: '1.05rem' }}>"{sent}"</span>
-                  <button 
-                    className="btn-secondary" 
+                  <button
+                    className="btn-secondary"
                     onClick={() => onPlayAudio(sent)}
                     style={{ padding: '0.4rem 1rem', fontSize: '0.85rem' }}
                   >

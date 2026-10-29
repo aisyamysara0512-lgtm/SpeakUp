@@ -5,14 +5,18 @@ import { soundEngine } from '../utils/soundEngine';
 
 /**
  * Think & Discover (Word Forest) Module
- * Features 5 Question Pathways (WHAT, WHO, WHY, WHERE, WHEN)
- * With explicit incorrect indicator (❌), Retry button, and Pip's Hint
+ * Clean, spacious, kid-friendly layout:
+ * - 5 Question Pathways (WHAT, WHO, WHY, WHERE, WHEN)
+ * - 1 big clear illustration + question card
+ * - 3 big visual answer buttons
+ * - Gentle feedback with spoken model sentence
  */
 export default function ThinkAndDiscover({
   onBack = () => {},
   onHome = () => {},
   onCompleteQuestion = () => {},
-  onPlayAudio = () => {}
+  onPlayAudio = () => {},
+  studentSupports = {}
 }) {
   const [activePathway, setActivePathway] = useState('WHAT');
   const [cardIndex, setCardIndex] = useState(0);
@@ -20,7 +24,7 @@ export default function ThinkAndDiscover({
   const [feedback, setFeedback] = useState(null); // 'correct' | 'retry' | null
   const [showHint, setShowHint] = useState(false);
   const [pipState, setPipState] = useState('idle');
-  const [pipMessage, setPipMessage] = useState('Explore the question clue and find the answer! 🔍');
+  const [pipMessage, setPipMessage] = useState('Look at the picture and pick the best answer! 🔍');
 
   const currentCategory = THINK_AND_DISCOVER_DATA[activePathway];
   const currentCard = currentCategory.cards[cardIndex];
@@ -32,7 +36,7 @@ export default function ThinkAndDiscover({
     setFeedback(null);
     setShowHint(false);
     setPipState('idle');
-    setPipMessage(`Exploring ${pKey}? pathway! Look at the first clue.`);
+    setPipMessage(`Exploring ${pKey}? questions! Tap any answer card below.`);
   };
 
   const handleChoice = (choiceText) => {
@@ -44,14 +48,14 @@ export default function ThinkAndDiscover({
       setFeedback('correct');
       setShowHint(false);
       setPipState('celebrating');
-      setPipMessage(`Super thinking! "${currentCard.answer}" is correct! ⭐`);
-      onPlayAudio(currentCard.answer);
+      setPipMessage(`Super thinking! "${currentCard.answer}" — "${currentCard.audioSentence}" ⭐`);
+      onPlayAudio(`${currentCard.answer}. ${currentCard.audioSentence}`);
       onCompleteQuestion(2, `Discovered: ${currentCard.answer}`);
     } else {
       soundEngine.playError();
       setFeedback('retry');
       setPipState('try-again');
-      setPipMessage(`Not that one! Tap "💡 Need a Hint?" or "🔄 Try Again"! 💛`);
+      setPipMessage(`Not quite! Tap "💡 Hint" or "🔄 Try Again"! 💛`);
     }
   };
 
@@ -59,7 +63,7 @@ export default function ThinkAndDiscover({
     setSelectedChoice(null);
     setFeedback(null);
     setPipState('idle');
-    setPipMessage("Ready for another attempt! Pick the best card. 🦜");
+    setPipMessage("Ready for another try! Pick the best card. 🦜");
   };
 
   const handleNextCard = () => {
@@ -71,15 +75,23 @@ export default function ThinkAndDiscover({
       setCardIndex(prev => prev + 1);
       setPipMessage("Next clue ready! What do you think?");
     } else {
+      setCardIndex(0);
       setPipState('celebrating');
-      setPipMessage(`You finished all clues in the ${activePathway}? pathway! Excellent exploration! 🎉`);
+      setPipMessage(`You finished all clues in the ${activePathway}? pathway! 🎉`);
     }
   };
+
+  const displayedOptions = studentSupports?.fewerChoices
+    ? [
+        currentCard.answer,
+        ...currentCard.options.filter(o => o.toLowerCase() !== currentCard.answer.toLowerCase()).slice(0, 1)
+      ]
+    : currentCard.options;
 
   return (
     <ActivityShell
       title={currentCategory.title}
-      moduleName="Think & Discover (Word Forest)"
+      moduleName="Think & Discover"
       stepIndex={cardIndex + 1}
       totalSteps={currentCategory.cards.length}
       pipState={pipState}
@@ -91,8 +103,8 @@ export default function ThinkAndDiscover({
       hint={showHint ? currentCard.hint : null}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}>
-        
-        {/* Pathway Tabs */}
+
+        {/* 5 Clean Pathway Tabs */}
         <div style={{
           display: 'flex',
           gap: '0.8rem',
@@ -134,12 +146,12 @@ export default function ThinkAndDiscover({
         <div style={{
           background: 'var(--bg-canvas)',
           borderRadius: '24px',
-          padding: '2.5rem 1.5rem',
+          padding: '2.2rem 1.5rem',
           textAlign: 'center',
           border: '2px solid var(--border-soft)',
           boxShadow: 'var(--shadow-sm)'
         }}>
-          <div style={{ fontSize: '4.5rem', marginBottom: '1rem' }}>{currentCard.icon}</div>
+          <div style={{ fontSize: '4.5rem', marginBottom: '0.8rem' }}>{currentCard.icon}</div>
           <span style={{
             fontSize: '0.85rem',
             fontWeight: 800,
@@ -147,7 +159,7 @@ export default function ThinkAndDiscover({
             textTransform: 'uppercase',
             letterSpacing: '1px'
           }}>
-            Question {cardIndex + 1} of 7
+            Question {cardIndex + 1} of {currentCategory.cards.length}
           </span>
           <h3 style={{
             fontSize: '1.9rem',
@@ -160,61 +172,76 @@ export default function ThinkAndDiscover({
           </h3>
         </div>
 
-        {/* Visual & Word Choices */}
+        {/* Big Visual & Word Choices */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1rem'
+          gap: '1.1rem'
         }}>
-          {currentCard.options.map(optionText => {
+          {displayedOptions.map(optionText => {
             const isSelected = selectedChoice === optionText;
             const isCorrect = isSelected && feedback === 'correct';
             const isWrong = isSelected && feedback === 'retry';
+            const optIcon = currentCard.optionIcons?.[optionText];
 
             return (
               <button
                 key={optionText}
                 onClick={() => handleChoice(optionText)}
                 style={{
-                  padding: '1.4rem 1.2rem',
-                  borderRadius: '20px',
+                  padding: '1.5rem 1.2rem',
+                  borderRadius: '22px',
                   cursor: 'pointer',
                   fontSize: '1.25rem',
                   fontWeight: 900,
                   textAlign: 'center',
-                  border: isCorrect 
-                    ? '3px solid var(--color-green)' 
-                    : isWrong 
-                    ? '3px solid var(--color-coral)' 
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  border: isCorrect
+                    ? '3px solid var(--color-green)'
+                    : isWrong
+                    ? '3px solid var(--color-coral)'
                     : '2px solid var(--border-soft)',
-                  background: isCorrect 
-                    ? 'var(--color-green-light)' 
-                    : isWrong 
-                    ? 'var(--color-coral-light)' 
+                  background: isCorrect
+                    ? 'var(--color-green-light)'
+                    : isWrong
+                    ? 'var(--color-coral-light)'
                     : 'var(--bg-card)',
                   color: isWrong ? 'var(--color-coral-strong)' : 'var(--color-navy)',
                   boxShadow: isWrong ? '0 0 0 4px var(--color-coral-border)' : 'var(--shadow-sm)',
                   transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
                 }}
               >
-                {optionText} {isWrong && '❌'} {isCorrect && '✅'}
+                {optIcon && <span style={{ fontSize: '2.6rem' }}>{optIcon}</span>}
+                <span>{optionText} {isWrong && '❌'} {isCorrect && '✅'}</span>
               </button>
             );
           })}
         </div>
 
-        {/* 1. SUCCESS FEEDBACK */}
+        {/* 1. SUCCESS FEEDBACK WITH MEANINGFUL SENTENCE */}
         {feedback === 'correct' && (
-          <div className="feedback-alert success" style={{ width: '100%' }}>
-            <span style={{ fontSize: '2.4rem' }}>🎉</span>
-            <div>
-              <h4 style={{ fontWeight: 900, fontSize: '1.2rem' }}>That's it! "{currentCard.answer}"</h4>
-              <p style={{ fontSize: '1.05rem', fontWeight: 600 }}>{currentCard.audioSentence}</p>
+          <div className="feedback-alert success" style={{ width: '100%', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <span style={{ fontSize: '2.4rem' }}>🎉</span>
+              <div>
+                <h4 style={{ fontWeight: 900, fontSize: '1.25rem' }}>{currentCard.answer}!</h4>
+                <p style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>"{currentCard.audioSentence}"</p>
+              </div>
             </div>
+            <button
+              className="btn-secondary"
+              onClick={() => onPlayAudio(currentCard.audioSentence)}
+              style={{ background: '#fff' }}
+            >
+              🔊 Hear Sentence
+            </button>
           </div>
         )}
 
-        {/* 2. EXPLICIT INCORRECT NOTICE WITH RETRY & HINT BUTTONS */}
+        {/* 2. GENTLE RETRY WITH HINT */}
         {feedback === 'retry' && (
           <div style={{
             width: '100%',
@@ -225,26 +252,26 @@ export default function ThinkAndDiscover({
             boxShadow: 'var(--shadow-md)'
           }}>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.2rem' }}>
-              <span style={{ fontSize: '2.5rem' }}>❌</span>
+              <span style={{ fontSize: '2.5rem' }}>💛</span>
               <div>
                 <h4 style={{ color: 'var(--color-coral-strong)', fontSize: '1.25rem', fontWeight: 900 }}>
-                  Incorrect choice: "{selectedChoice}"
+                  Let's try another card!
                 </h4>
                 <p style={{ color: 'var(--color-navy)', fontWeight: 600, fontSize: '0.98rem' }}>
-                  That card does not answer this question. Try picking another card!
+                  "{selectedChoice}" doesn't match this clue. Try picking another card!
                 </p>
               </div>
             </div>
 
             <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
-              <button 
+              <button
                 className="btn-coral"
                 onClick={handleRetry}
                 style={{ padding: '0.7rem 1.4rem', fontSize: '0.95rem' }}
               >
                 🔄 Try Again
               </button>
-              <button 
+              <button
                 className="btn-secondary"
                 onClick={() => setShowHint(true)}
                 style={{ padding: '0.7rem 1.4rem', fontSize: '0.95rem', background: 'var(--color-yellow-light)', borderColor: 'var(--color-yellow-border)', color: 'var(--color-yellow-deep)' }}
@@ -272,7 +299,7 @@ export default function ThinkAndDiscover({
 
         {/* Navigation / Actions */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <button 
+          <button
             className="btn-secondary"
             onClick={() => onPlayAudio(currentCard.question)}
           >

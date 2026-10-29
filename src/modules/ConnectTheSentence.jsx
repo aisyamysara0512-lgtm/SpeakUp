@@ -5,7 +5,8 @@ import { soundEngine } from '../utils/soundEngine';
 
 /**
  * Connect the Sentence activity
- * With clear visual error indication, Retry button, and Pip's gentle Hint
+ * Clean, spacious, kid-friendly layout with picture clue,
+ * big connecting word options (to, when, because), gentle Retry, and Pip's Hint.
  */
 export default function ConnectTheSentence({
   onBack = () => {},
@@ -90,8 +91,7 @@ export default function ConnectTheSentence({
     );
   }
 
-  // Display incomplete sentence with blank replaced if correct
-  const displaySentence = feedbackState === 'correct' 
+  const displaySentence = feedbackState === 'correct'
     ? item.incomplete.replace('___', `[ ${item.answer} ]`)
     : item.incomplete;
 
@@ -110,7 +110,7 @@ export default function ConnectTheSentence({
       hint={showHint ? item.hint : null}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center' }}>
-        
+
         {/* Situation Picture & Context Card */}
         <div style={{
           background: 'var(--bg-canvas)',
@@ -140,7 +140,7 @@ export default function ConnectTheSentence({
           </h3>
         </div>
 
-        {/* Choice Options */}
+        {/* Big Choice Options */}
         <div style={{
           display: 'flex',
           gap: '1.2rem',
@@ -164,15 +164,15 @@ export default function ConnectTheSentence({
                   fontWeight: 900,
                   borderRadius: '24px',
                   cursor: 'pointer',
-                  border: isCorrect 
-                    ? '3px solid var(--color-green)' 
-                    : isWrong 
-                    ? '3px solid var(--color-coral)' 
+                  border: isCorrect
+                    ? '3px solid var(--color-green)'
+                    : isWrong
+                    ? '3px solid var(--color-coral)'
                     : '2px solid var(--border-soft)',
-                  background: isCorrect 
-                    ? 'var(--color-green-light)' 
-                    : isWrong 
-                    ? 'var(--color-coral-light)' 
+                  background: isCorrect
+                    ? 'var(--color-green-light)'
+                    : isWrong
+                    ? 'var(--color-coral-light)'
                     : 'var(--bg-card)',
                   color: isWrong ? 'var(--color-coral-strong)' : 'var(--color-navy)',
                   boxShadow: isWrong ? '0 0 0 4px var(--color-coral-border)' : 'var(--shadow-sm)',
@@ -196,7 +196,7 @@ export default function ConnectTheSentence({
           </div>
         )}
 
-        {/* 2. CLEAR ERROR FEEDBACK WITH RETRY & HINT BUTTONS */}
+        {/* 2. GENTLE ERROR FEEDBACK WITH RETRY & HINT BUTTONS */}
         {feedbackState === 'retry' && (
           <div style={{
             width: '100%',
@@ -208,7 +208,7 @@ export default function ConnectTheSentence({
             boxShadow: 'var(--shadow-md)'
           }}>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.2rem' }}>
-              <span style={{ fontSize: '2.5rem' }}>❌</span>
+              <span style={{ fontSize: '2.5rem' }}>💛</span>
               <div>
                 <h4 style={{ color: 'var(--color-coral-strong)', fontSize: '1.25rem', fontWeight: 900 }}>
                   Not quite the right connecting word!
@@ -220,14 +220,14 @@ export default function ConnectTheSentence({
             </div>
 
             <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
-              <button 
+              <button
                 className="btn-coral"
                 onClick={handleRetry}
                 style={{ padding: '0.7rem 1.4rem', fontSize: '0.95rem' }}
               >
                 🔄 Try Again
               </button>
-              <button 
+              <button
                 className="btn-secondary"
                 onClick={() => setShowHint(true)}
                 style={{ padding: '0.7rem 1.4rem', fontSize: '0.95rem', background: 'var(--color-yellow-light)', borderColor: 'var(--color-yellow-border)', color: 'var(--color-yellow-deep)' }}
@@ -255,11 +255,11 @@ export default function ConnectTheSentence({
 
         {/* Actions Row */}
         <div style={{ display: 'flex', gap: '1rem', width: '100%', justifyContent: 'space-between', marginTop: '1rem' }}>
-          <button 
-            className="btn-secondary" 
+          <button
+            className="btn-secondary"
             onClick={() => onPlayAudio(item.incomplete.replace('___', 'blank'))}
           >
-            🔊 Hear Incomplete Sentence
+            🔊 Hear Sentence
           </button>
 
           {feedbackState === 'correct' && (

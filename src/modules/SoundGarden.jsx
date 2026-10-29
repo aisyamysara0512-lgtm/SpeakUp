@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ActivityShell from '../components/ActivityShell';
 import PipCompanion from '../components/PipCompanion';
+import SharedVocabularyBanner from '../components/SharedVocabularyBanner';
 import { soundEngine } from '../utils/soundEngine';
 import './SoundGardenFlipbook.css';
 
@@ -10,16 +11,21 @@ const learningImages = Object.values(imageModules);
 
 /**
  * ============================================================================
- * SOUND GARDEN & ARTICULATION — UNIFIED FLIPBOOK DESK EXPERIENCE
+ * SOUND GARDEN — UNIFIED MONTESSORI FLIPBOOK DESK EXPERIENCE
  * ----------------------------------------------------------------------------
- * A warm, uncluttered, Montessori-inspired learning easel with zero harsh green.
- * Features:
- * - Natural birchwood / warm cream tabletop easel stand with golden rings
- * - Picture card + individual letter cards with soft pastel category pills
- * - Integrated spelling shelf and tactile letter tiles
- * - 4 Structured pathways (Letter Sounds, Build a Word, Blends, Vowel Patterns)
- * - Activity levels: Full Word Builder & First Sound focus
- * - Speech therapy articulation diagrams & phonetic audio models
+ * Preserves the Birchwood / Teal / Cream flipbook easel, golden binder rings,
+ * letter sounds, digraphs, blends, vowel patterns, and word illustrations.
+ *
+ * Enhanced with the consistent 7-step learning sequence:
+ * 1. Display clear illustration of familiar word
+ * 2. Display written target word or prompt
+ * 3. Play the word's audio model
+ * 4. Interact with letter cards to build or complete the word
+ * 5. Highlight the relevant spelling pattern (e.g., "sh" in ship, "um" in umbrella)
+ * 6. Provide supportive feedback and opportunity to retry
+ * 7. Show the completed word, highlighted pattern, and its meaning
+ * + Optional Sound Position activity (Beginning, Middle, End)
+ * + Clear distinction between phonological/spelling awareness and spoken pronunciation.
  * ============================================================================
  */
 
@@ -38,6 +44,10 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'blue', 'teal'],
         emoji: '🐱',
         label: 'Cat',
+        highlightPattern: 'c',
+        targetSoundLabel: '/k/ ("c")',
+        soundPosition: 'beginning',
+        meaning: 'A soft furry pet that purrs and meows.',
         imgIndex: 14,
         distractors: ['b', 'p', 's', 'o'],
         hint: 'Starts with the crunchy /k/ sound! Purrs and meows.'
@@ -51,6 +61,10 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'blue', 'teal'],
         emoji: '🧢',
         label: 'Cap',
+        highlightPattern: 'p',
+        targetSoundLabel: '/p/ ("p")',
+        soundPosition: 'end',
+        meaning: 'A soft hat with a visor that shades your eyes from the sun.',
         imgIndex: 14,
         distractors: ['t', 'd', 'm', 'u'],
         hint: 'You wear it on your head to block the sun!'
@@ -64,6 +78,10 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'blue', 'teal'],
         emoji: '🐶',
         label: 'Dog',
+        highlightPattern: 'd',
+        targetSoundLabel: '/d/ ("d")',
+        soundPosition: 'beginning',
+        meaning: 'A friendly animal companion that wags its tail and barks.',
         imgIndex: 1,
         distractors: ['b', 't', 'c', 'a'],
         hint: 'Friendly pup that barks /d/ /d/ dog!'
@@ -77,6 +95,10 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'blue', 'teal'],
         emoji: '☀️',
         label: 'Sun',
+        highlightPattern: 's',
+        targetSoundLabel: '/s/ ("s")',
+        soundPosition: 'beginning',
+        meaning: 'The bright star that gives us warm daylight.',
         imgIndex: 5,
         distractors: ['r', 'a', 't', 'p'],
         hint: 'Bright and sunny! Starts with the soft hissing /s/ sound.'
@@ -90,6 +112,10 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'blue', 'teal'],
         emoji: '☕',
         label: 'Cup',
+        highlightPattern: 'u',
+        targetSoundLabel: 'short /ʌ/ ("u")',
+        soundPosition: 'middle',
+        meaning: 'A small vessel with a handle used for drinking water or milk.',
         imgIndex: 16,
         distractors: ['k', 'o', 't', 'b'],
         hint: 'You drink warm cocoa or milk from it!'
@@ -103,6 +129,10 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'blue', 'teal'],
         emoji: '🐷',
         label: 'Pig',
+        highlightPattern: 'p',
+        targetSoundLabel: '/p/ ("p")',
+        soundPosition: 'beginning',
+        meaning: 'A pink farm animal with a curly tail.',
         imgIndex: 0,
         distractors: ['b', 'e', 'd', 't'],
         hint: 'Starts with a gentle popping /p/ sound!'
@@ -116,6 +146,10 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'blue', 'teal'],
         emoji: '🌬️',
         label: 'Fan',
+        highlightPattern: 'f',
+        targetSoundLabel: '/f/ ("f")',
+        soundPosition: 'beginning',
+        meaning: 'A device that spins or waves to move cool air.',
         imgIndex: 2,
         distractors: ['v', 'u', 'm', 't'],
         hint: 'Blows cool air! Teeth rest on your lower lip for /f/.'
@@ -129,18 +163,56 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'blue', 'teal'],
         emoji: '🛏️',
         label: 'Bed',
+        highlightPattern: 'd',
+        targetSoundLabel: '/d/ ("d")',
+        soundPosition: 'end',
+        meaning: 'Cozy furniture with a pillow and blanket where you sleep.',
         imgIndex: 0,
-        distractors: ['d', 'a', 'p', 't'],
+        distractors: ['p', 'a', 't', 'm'],
         hint: 'Where you sleep comfortably at night.'
       }
     ]
   },
 
-  // Pathway 2: Build a Word
+  // Pathway 2: Build a Word (Includes Shared Vocabulary Bridge targets!)
   'build-a-word': {
     name: '🧩 Build a Word',
-    description: 'Assemble multi-letter familiar words and everyday vocabulary.',
+    description: 'Assemble multi-letter familiar words and shared everyday vocabulary.',
     words: [
+      {
+        id: 'umbrella',
+        word: 'umbrella',
+        letters: ['um', 'br', 'el', 'la'],
+        letterColors: ['#FF7A5C', '#2563EB', '#0B847F', '#0B847F'],
+        tabs: ['Start Chunk', 'Blend', 'Middle', 'Ending'],
+        tabColors: ['yellow', 'blue', 'teal', 'teal'],
+        emoji: '☂️',
+        label: 'Umbrella',
+        highlightPattern: 'um',
+        targetSoundLabel: '/ʌm/ ("um")',
+        soundPosition: 'beginning',
+        meaning: 'A canopy you hold over your head to stay dry when it rains.',
+        imgIndex: 16,
+        distractors: ['in', 'sh', 'op'],
+        hint: 'Keeps you dry in the rain! Starts with "um" + "br".'
+      },
+      {
+        id: 'water',
+        word: 'water',
+        letters: ['w', 'a', 't', 'er'],
+        letterColors: ['#0B847F', '#FF7A5C', '#0B847F', '#2563EB'],
+        tabs: ['Consonant', 'Vowel', 'Consonant', 'Ending'],
+        tabColors: ['teal', 'yellow', 'teal', 'blue'],
+        emoji: '🥛',
+        label: 'Water',
+        highlightPattern: 'w',
+        targetSoundLabel: '/w/ ("w")',
+        soundPosition: 'beginning',
+        meaning: 'A clear, refreshing drink we need when we feel thirsty.',
+        imgIndex: 10,
+        distractors: ['m', 'o', 'p'],
+        hint: 'A cool drink when you are thirsty! Starts with /w/.'
+      },
       {
         id: 'ball',
         word: 'ball',
@@ -150,9 +222,13 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'blue', 'teal', 'teal'],
         emoji: '⚽',
         label: 'Ball',
+        highlightPattern: 'll',
+        targetSoundLabel: '/l/ ("ll")',
+        soundPosition: 'end',
+        meaning: 'A round toy used for kicking, throwing, and bouncing in games.',
         imgIndex: 0,
         distractors: ['d', 'o', 't', 's'],
-        hint: 'Bounces high and round! Starts with /b/.'
+        hint: 'Bounces high and round! Starts with /b/ and ends with double l.'
       },
       {
         id: 'kite',
@@ -163,6 +239,10 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'blue', 'teal', 'blue'],
         emoji: '🪁',
         label: 'Kite',
+        highlightPattern: 'i_e',
+        targetSoundLabel: 'long /aɪ/ ("i")',
+        soundPosition: 'middle',
+        meaning: 'A light frame flown on a string high in the wind.',
         imgIndex: 3,
         distractors: ['c', 'a', 'p', 'l'],
         hint: 'Flies high in the windy sky!'
@@ -176,6 +256,10 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'blue', 'blue', 'teal'],
         emoji: '🌙',
         label: 'Moon',
+        highlightPattern: 'oo',
+        targetSoundLabel: 'long /uː/ ("oo")',
+        soundPosition: 'middle',
+        meaning: 'Glows softly in the dark sky at night.',
         imgIndex: 4,
         distractors: ['s', 'u', 'p', 't'],
         hint: 'Glows in the night sky! Lips press together for /m/.'
@@ -189,22 +273,13 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'teal', 'blue', 'teal'],
         emoji: '🐸',
         label: 'Frog',
+        highlightPattern: 'fr',
+        targetSoundLabel: '/fr/ blend',
+        soundPosition: 'beginning',
+        meaning: 'A small green amphibian that hops on lily pads.',
         imgIndex: 2,
         distractors: ['p', 'l', 'u', 'd'],
         hint: 'Ribbit! Hops on lily pads in the pond.'
-      },
-      {
-        id: 'star',
-        word: 'star',
-        letters: ['s', 't', 'a', 'r'],
-        letterColors: ['#0B847F', '#0B847F', '#FF7A5C', '#0B847F'],
-        tabs: ['Consonant', 'Consonant', 'Vowel', 'Consonant'],
-        tabColors: ['teal', 'teal', 'blue', 'teal'],
-        emoji: '⭐',
-        label: 'Star',
-        imgIndex: 5,
-        distractors: ['c', 'u', 'p', 'm'],
-        hint: 'Twinkles in the evening sky!'
       },
       {
         id: 'fish',
@@ -215,9 +290,13 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'blue', 'blue', 'blue'],
         emoji: '🐟',
         label: 'Fish',
+        highlightPattern: 'sh',
+        targetSoundLabel: '/ʃ/ ("sh")',
+        soundPosition: 'end',
+        meaning: 'A water animal with fins and scales that swims in rivers and seas.',
         imgIndex: 7,
         distractors: ['v', 'e', 'p', 't'],
-        hint: 'Swims gently in the clean water.'
+        hint: 'Swims gently in the clean water. Ends with "sh"!'
       }
     ]
   },
@@ -236,6 +315,10 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['blue', 'yellow', 'teal'],
         emoji: '🚢',
         label: 'Ship',
+        highlightPattern: 'sh',
+        targetSoundLabel: '/ʃ/ ("sh")',
+        soundPosition: 'beginning',
+        meaning: 'A large boat that sails across deep water and oceans.',
         imgIndex: 7,
         distractors: ['ch', 'th', 'a', 't'],
         hint: 'Sails across the big blue ocean! Starts with /sh/.'
@@ -249,6 +332,10 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['blue', 'yellow', 'teal'],
         emoji: '🪓',
         label: 'Chop',
+        highlightPattern: 'ch',
+        targetSoundLabel: '/tʃ/ ("ch")',
+        soundPosition: 'beginning',
+        meaning: 'To cut vegetables or wood into smaller pieces.',
         imgIndex: 6,
         distractors: ['sh', 'th', 'i', 't'],
         hint: 'Cut vegetables or wood! Starts with the crisp /ch/ sound.'
@@ -262,9 +349,13 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['blue', 'yellow', 'teal', 'teal'],
         emoji: '👍',
         label: 'Thumb',
+        highlightPattern: 'th',
+        targetSoundLabel: '/θ/ ("th")',
+        soundPosition: 'beginning',
+        meaning: 'The short, strong first finger on the side of your hand.',
         imgIndex: 8,
         distractors: ['ph', 'wh', 'o', 'p'],
-        hint: 'Give a big thumbs up! Tongue between teeth for /th/.'
+        hint: 'Give a big thumbs up! Tongue gently between teeth for /th/.'
       },
       {
         id: 'duck',
@@ -275,9 +366,13 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'yellow', 'blue'],
         emoji: '🦆',
         label: 'Duck',
+        highlightPattern: 'ck',
+        targetSoundLabel: '/k/ ("ck")',
+        soundPosition: 'end',
+        meaning: 'A water bird with webbed feet and a flat bill that quacks.',
         imgIndex: 11,
         distractors: ['b', 'a', 'sh', 't'],
-        hint: 'Quack quack! Ends with the /ck/ blend.'
+        hint: 'Quack quack! Ends with the /ck/ spelling pattern.'
       },
       {
         id: 'phone',
@@ -288,6 +383,10 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['blue', 'yellow', 'teal', 'yellow'],
         emoji: '📱',
         label: 'Phone',
+        highlightPattern: 'ph',
+        targetSoundLabel: '/f/ ("ph")',
+        soundPosition: 'beginning',
+        meaning: 'A device used to talk to family and friends from far away.',
         imgIndex: 9,
         distractors: ['f', 'th', 'u', 't'],
         hint: 'Ring ring! "PH" sounds like /f/.'
@@ -301,6 +400,10 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['blue', 'yellow', 'teal', 'yellow'],
         emoji: '🐳',
         label: 'Whale',
+        highlightPattern: 'wh',
+        targetSoundLabel: '/w/ ("wh")',
+        soundPosition: 'beginning',
+        meaning: 'A giant ocean mammal that breathes air through a blowhole.',
         imgIndex: 10,
         distractors: ['w', 'sh', 'o', 'p'],
         hint: 'Huge friendly creature spouting water in the sea.'
@@ -322,9 +425,13 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'orange', 'teal'],
         emoji: '⛵',
         label: 'Boat',
+        highlightPattern: 'oa',
+        targetSoundLabel: 'long /oʊ/ ("oa")',
+        soundPosition: 'middle',
+        meaning: 'A small watercraft that floats on lakes and rivers.',
         imgIndex: 22,
         distractors: ['d', 'ee', 'ai', 'p'],
-        hint: 'Floats on the lake! "oa" makes the long /o/ sound.'
+        hint: 'Floats on the lake! "oa" makes the long /o/ sound in the middle.'
       },
       {
         id: 'sheep',
@@ -335,9 +442,13 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['blue', 'orange', 'teal'],
         emoji: '🐑',
         label: 'Sheep',
+        highlightPattern: 'ee',
+        targetSoundLabel: 'long /iː/ ("ee")',
+        soundPosition: 'middle',
+        meaning: 'A gentle farm animal with thick, curly wool.',
         imgIndex: 12,
         distractors: ['ch', 'oo', 'ea', 't'],
-        hint: 'Baa baa! "ee" makes the smiling long /e/ sound.'
+        hint: 'Baa baa! "ee" makes the smiling long /e/ sound in the middle.'
       },
       {
         id: 'cow',
@@ -348,6 +459,10 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'orange'],
         emoji: '🐄',
         label: 'Cow',
+        highlightPattern: 'ow',
+        targetSoundLabel: '/aʊ/ ("ow")',
+        soundPosition: 'end',
+        meaning: 'A farm animal that eats grass and gives fresh milk.',
         imgIndex: 21,
         distractors: ['k', 'oy', 'aw', 't'],
         hint: 'Moo! Gives delicious milk.'
@@ -361,9 +476,13 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'orange'],
         emoji: '👦',
         label: 'Boy',
+        highlightPattern: 'oy',
+        targetSoundLabel: '/ɔɪ/ ("oy")',
+        soundPosition: 'end',
+        meaning: 'A young male child.',
         imgIndex: 20,
         distractors: ['d', 'ay', 'ou', 'p'],
-        hint: 'Young child having fun playing!'
+        hint: 'Ends with the gliding "oy" vowel sound!'
       },
       {
         id: 'train',
@@ -374,6 +493,10 @@ export const FLIPBOOK_CURRICULUM = {
         tabColors: ['teal', 'teal', 'orange', 'teal'],
         emoji: '🚆',
         label: 'Train',
+        highlightPattern: 'ai',
+        targetSoundLabel: 'long /eɪ/ ("ai")',
+        soundPosition: 'middle',
+        meaning: 'Connected railway cars that travel fast along tracks.',
         imgIndex: 18,
         distractors: ['p', 'l', 'ee', 'd'],
         hint: 'Choo choo on the railway tracks!'
@@ -387,20 +510,23 @@ export default function SoundGarden({
   onHome = () => {},
   onPlayAudio = () => {},
   onOpenSpeakPractice = () => {},
-  onExploreSound = () => {}
+  onExploreSound = () => {},
+  sharedWordId = 'umbrella',
+  onSelectSharedWord = () => {},
+  onNavigateModule = () => {}
 }) {
   // Active Pathway
-  const [activePathway, setActivePathway] = useState('letter-sounds');
+  const [activePathway, setActivePathway] = useState('blends');
   const currentPathway = FLIPBOOK_CURRICULUM[activePathway];
 
   // Active Word Index within current pathway
   const [wordIndex, setWordIndex] = useState(0);
   const currentWordData = currentPathway.words[wordIndex] || currentPathway.words[0];
 
-  // Stand Theme: 'theme-birch' (warm natural wood) | 'theme-teal' (calm teal) | 'theme-cream' (soft cream)
+  // Stand Theme: 'theme-birch' | 'theme-teal' | 'theme-cream'
   const [standTheme, setStandTheme] = useState('theme-birch');
 
-  // Activity Mode: 'builder' (all slots empty) | 'first-sound' (first letter missing)
+  // Activity Mode: 'builder' (all slots empty) | 'first-sound' (first letter missing) | 'sound-position' (beginning/middle/end)
   const [activityMode, setActivityMode] = useState('builder');
 
   // Spelling Workspace State
@@ -411,12 +537,16 @@ export default function SoundGarden({
   const [feedbackError, setFeedbackError] = useState(false);
   const [showHint, setShowHint] = useState(false);
 
+  // Sound Position Optional Activity State ('beginning' | 'middle' | 'end')
+  const [selectedPosition, setSelectedPosition] = useState(null);
+  const [positionFeedback, setPositionFeedback] = useState(null);
+
   // Articulation diagram modal
   const [selectedPlacementImg, setSelectedPlacementImg] = useState(null);
 
   // Pip speech message
   const [pipMessage, setPipMessage] = useState(
-    "Welcome to the Flipbook! Tap letter cards from the tray to build the word! 📖"
+    "Welcome to the Flipbook! Look at the picture, listen to the word, and tap letter cards to build it! 📖"
   );
   const [pipState, setPipState] = useState('idle');
 
@@ -429,10 +559,11 @@ export default function SoundGarden({
     setIsSuccess(false);
     setFeedbackError(false);
     setShowHint(false);
+    setSelectedPosition(null);
+    setPositionFeedback(null);
     setPipState('idle');
 
     if (activityMode === 'first-sound') {
-      // First sound missing mode: fill all letters except the first
       const initialPlaced = targetWord.letters.map((ltr, idx) => (idx === 0 ? null : ltr));
       setPlacedSlots(initialPlaced);
 
@@ -441,14 +572,17 @@ export default function SoundGarden({
       setLetterBank(bankItems);
       setUsedBankIndices(new Set());
       setPipMessage(`Find the starting sound for "${targetWord.label}"! Which card goes first? 🔍`);
+    } else if (activityMode === 'sound-position') {
+      setPlacedSlots([...targetWord.letters]);
+      setLetterBank([]);
+      setUsedBankIndices(new Set());
+      setPipMessage(`Listen to "${targetWord.label}". Does the target sound ${targetWord.targetSoundLabel || targetWord.highlightPattern} happen at the Beginning, Middle, or End? 👂`);
     } else {
-      // Full Word Builder: all slots empty
       setPlacedSlots(new Array(targetWord.letters.length).fill(null));
-
       const bankItems = shuffleArray([...targetWord.letters, ...targetWord.distractors.slice(0, 3)]);
       setLetterBank(bankItems);
       setUsedBankIndices(new Set());
-      setPipMessage(`Build the word "${targetWord.label}"! Look at the picture and tap the cards below. ✨`);
+      setPipMessage(`Step 1-4: Look at "${targetWord.label}", listen to the audio model, and build the word with the letter cards! ✨`);
     }
   };
 
@@ -461,27 +595,37 @@ export default function SoundGarden({
     return copy;
   }
 
-  // Handle switching pathways
+  // Handle jumping to a word when user clicks a Shared Vocabulary Bridge pill
+  const handleSelectSharedBridgeWord = (sWordId) => {
+    onSelectSharedWord(sWordId);
+    for (const pKey of Object.keys(FLIPBOOK_CURRICULUM)) {
+      const idx = FLIPBOOK_CURRICULUM[pKey].words.findIndex(w => w.id === sWordId);
+      if (idx !== -1) {
+        setActivePathway(pKey);
+        setWordIndex(idx);
+        return;
+      }
+    }
+  };
+
   const handleSelectPathway = (pKey) => {
     soundEngine.playClick();
     setActivePathway(pKey);
     setWordIndex(0);
   };
 
-  // Play word audio
   const handlePlayWord = () => {
     soundEngine.playClick();
     onPlayAudio(currentWordData.word);
     setPipState('speaking');
-    setPipMessage(`Pip says: "${currentWordData.word}"! Listen to the clear sounds. 🗣️`);
+    setPipMessage(`Pip says: "${currentWordData.word}"! Notice the "${currentWordData.highlightPattern}" spelling pattern. 🗣️`);
     onExploreSound(currentWordData.word);
   };
 
-  // Sound out letter by letter
   const handleSoundOut = async () => {
     soundEngine.playClick();
     setPipState('speaking');
-    setPipMessage(`Let's sound it out together: ${currentWordData.letters.join(' — ')}!`);
+    setPipMessage(`Let's sound out the parts: ${currentWordData.letters.join(' — ')}!`);
 
     for (let i = 0; i < currentWordData.letters.length; i++) {
       const ltr = currentWordData.letters[i];
@@ -494,16 +638,14 @@ export default function SoundGarden({
     }
   };
 
-  // Placing a letter from the desk letter bank into the first available empty slot
   const handleSelectBankCard = (letter, bankIdx) => {
     if (usedBankIndices.has(bankIdx) || isSuccess) return;
 
     soundEngine.playClick();
     onPlayAudio(letter);
 
-    // Find first empty slot index
     const nextEmptyIdx = placedSlots.findIndex(s => s === null);
-    if (nextEmptyIdx === -1) return; // All slots filled
+    if (nextEmptyIdx === -1) return;
 
     const nextPlaced = [...placedSlots];
     nextPlaced[nextEmptyIdx] = letter;
@@ -513,16 +655,14 @@ export default function SoundGarden({
     nextUsed.add(bankIdx);
     setUsedBankIndices(nextUsed);
 
-    // If all slots are filled, check spelling
     if (nextPlaced.every(s => s !== null)) {
       validateSpelling(nextPlaced);
     }
   };
 
-  // Removing a letter from a slot back to the bank
   const handleRemoveSlot = (slotIdx) => {
     if (isSuccess || placedSlots[slotIdx] === null) return;
-    if (activityMode === 'first-sound' && slotIdx !== 0) return; // Only target slot is mutable in first-sound mode
+    if (activityMode === 'first-sound' && slotIdx !== 0) return;
 
     soundEngine.playClick();
     const letterToRemove = placedSlots[slotIdx];
@@ -531,7 +671,6 @@ export default function SoundGarden({
     nextPlaced[slotIdx] = null;
     setPlacedSlots(nextPlaced);
 
-    // Un-use from letter bank
     const nextUsed = new Set(usedBankIndices);
     const bankIndexToFree = letterBank.findIndex((ltr, idx) => ltr === letterToRemove && nextUsed.has(idx));
     if (bankIndexToFree !== -1) {
@@ -542,7 +681,6 @@ export default function SoundGarden({
     setFeedbackError(false);
   };
 
-  // Clear all mutable slots
   const handleClearSlots = () => {
     soundEngine.playClick();
     if (activityMode === 'first-sound') {
@@ -555,7 +693,6 @@ export default function SoundGarden({
     setFeedbackError(false);
   };
 
-  // Validate the spelled word against target letters
   const validateSpelling = (slotsToCheck) => {
     const isCorrect = slotsToCheck.every((ltr, idx) => ltr === currentWordData.letters[idx]);
 
@@ -565,10 +702,10 @@ export default function SoundGarden({
       setFeedbackError(false);
       setShowHint(false);
       setPipState('celebrating');
-      setPipMessage(`Hooray! You spelled "${currentWordData.label}" perfectly on the stand! 🌟`);
+      setPipMessage(`Hooray! You built "${currentWordData.label}" and highlighted "${currentWordData.highlightPattern}"! 🌟`);
 
       setTimeout(() => {
-        onPlayAudio(currentWordData.word);
+        onPlayAudio(`${currentWordData.word}. ${currentWordData.meaning}`);
       }, 400);
 
       onExploreSound(currentWordData.word);
@@ -576,11 +713,28 @@ export default function SoundGarden({
       soundEngine.playError();
       setFeedbackError(true);
       setPipState('try-again');
-      setPipMessage(`Almost there! Check the order of the cards, or tap "💡 Need a Hint?"! 💛`);
+      setPipMessage(`Almost there! Tap any letter card in the slot to swap it, or tap "💡 Need a Hint?"! 💛`);
     }
   };
 
-  // Next and previous word navigation
+  const handleSelectPosition = (pos) => {
+    setSelectedPosition(pos);
+    onPlayAudio(pos);
+    if (pos === currentWordData.soundPosition) {
+      soundEngine.playTing();
+      setPositionFeedback('correct');
+      setIsSuccess(true);
+      setPipState('celebrating');
+      setPipMessage(`Spot on! The sound ${currentWordData.targetSoundLabel || currentWordData.highlightPattern} is at the ${pos.toUpperCase()} of "${currentWordData.word}"! 🌟`);
+      onExploreSound(`${currentWordData.word} (${pos})`);
+    } else {
+      soundEngine.playError();
+      setPositionFeedback('retry');
+      setPipState('try-again');
+      setPipMessage(`Listen closely to "${currentWordData.word}" where ${currentWordData.highlightPattern} appears, and try again! 💛`);
+    }
+  };
+
   const handleNextWord = () => {
     soundEngine.playClick();
     if (wordIndex + 1 < currentPathway.words.length) {
@@ -601,7 +755,7 @@ export default function SoundGarden({
 
   return (
     <ActivityShell
-      title="Sound Garden & Articulation Flipbook"
+      title="Sound Garden — Letters, Speech Sounds & Spelling Flipbook"
       moduleName="Sound Garden"
       stepIndex={wordIndex + 1}
       totalSteps={currentPathway.words.length}
@@ -609,14 +763,13 @@ export default function SoundGarden({
       pipMessage={pipMessage}
       onBack={onBack}
       onHome={onHome}
+      onSpeakModel={onPlayAudio}
+      modelText={currentWordData.word}
     >
       <div className="flipbook-module-container">
 
-        {/* ------------------------------------------------------------------ */}
-        {/* 1. TOP CONTROL BAR (CLEAN, COMPACT, INTUITIVE)                     */}
-        {/* ------------------------------------------------------------------ */}
+        {/* 1. TOP CONTROL BAR */}
         <div className="flipbook-topbar">
-          {/* Pathway Selector Tabs */}
           <div className="pathway-selector-group">
             {Object.keys(FLIPBOOK_CURRICULUM).map(pKey => {
               const p = FLIPBOOK_CURRICULUM[pKey];
@@ -633,16 +786,13 @@ export default function SoundGarden({
             })}
           </div>
 
-          {/* Stepper & Stand Theme Options */}
           <div className="topbar-right-controls">
-            {/* Word Stepper Navigation */}
             <div className="word-stepper-pill">
               <button className="stepper-nav-btn" onClick={handlePrevWord} title="Previous word">‹</button>
               <span className="stepper-label">{currentWordData.emoji} {currentWordData.label}</span>
               <button className="stepper-nav-btn" onClick={handleNextWord} title="Next word">›</button>
             </div>
 
-            {/* Stand Appearance Selector (No harsh green, warm Montessori finishes) */}
             <div className="stand-theme-selector" title="Choose flipbook stand finish">
               <button
                 className={`theme-pill-btn ${standTheme === 'theme-birch' ? 'active' : ''}`}
@@ -666,32 +816,36 @@ export default function SoundGarden({
           </div>
         </div>
 
-        {/* ------------------------------------------------------------------ */}
-        {/* 2. THE INTEGRATED FLIPBOOK EASEL STAND (HERO COMPONENT)           */}
-        {/* ------------------------------------------------------------------ */}
+        {/* 2. THE INTEGRATED FLIPBOOK EASEL STAND */}
         <div className={`flipbook-stand-container ${standTheme}`}>
 
-          {/* Stand Top Ribbon */}
-          <div className="stand-top-ribbon">
+          {/* Stand Top Ribbon with Target Word & Highlighted Pattern */}
+          <div className="stand-top-ribbon" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
             <div className="stand-brand-label">
               <span>📖</span>
-              <span>Spelling Flipbook Stand</span>
+              <span>Spelling & Pattern Flipbook</span>
             </div>
 
-            <div className="stand-pip-clue-pill">
-              <span>🎯</span>
-              <span>Target: <strong>"{currentWordData.label}"</strong></span>
+            <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div className="stand-pip-clue-pill">
+                <span>🎯</span>
+                <span>Target Word: <strong>"{currentWordData.label}"</strong></span>
+              </div>
+              <div className="stand-pip-clue-pill" style={{ background: '#DBEAFE', color: '#1E40AF' }}>
+                <span>✨</span>
+                <span>Pattern Highlight: <strong>"{currentWordData.highlightPattern}"</strong></span>
+              </div>
             </div>
           </div>
 
           {/* Upper Section: The Flashcards on Golden Binder Rings */}
           <div className="stand-cards-row">
 
-            {/* CARD 1: PICTURE CARD */}
+            {/* STEP 1 & 2: PICTURE CARD + WRITTEN TARGET WORD */}
             <div className="stand-card-column">
               <div className="golden-binder-ring" title="Golden spiral binder ring"></div>
 
-              <div 
+              <div
                 className="flipbook-card"
                 onClick={handlePlayWord}
                 style={{ cursor: 'pointer' }}
@@ -705,51 +859,55 @@ export default function SoundGarden({
                 </div>
 
                 <div className="card-category-pill cat-pill-pink">
-                  Picture Card
+                  1. Picture & Word
                 </div>
               </div>
             </div>
 
-            {/* CARDS 2+: INDIVIDUAL LETTER CARDS (c - a - t) */}
+            {/* CARDS 2+: INDIVIDUAL LETTER / PATTERN CARDS */}
             {currentWordData.letters.map((ltr, colIdx) => {
               const tabLabel = currentWordData.tabs[colIdx] || (colIdx === 1 ? 'Vowel' : 'Consonant');
               const tabTheme = currentWordData.tabColors[colIdx] || 'teal';
               const ltrColor = currentWordData.letterColors[colIdx] || '#0B847F';
+              const isHighlightedPattern = ltr === currentWordData.highlightPattern || currentWordData.highlightPattern?.includes(ltr);
 
-              // In builder mode before completion, card shows gentle placeholder
               let displayedLetter = ltr;
               if (activityMode === 'builder' && !isSuccess) {
-                displayedLetter = '?';
+                displayedLetter = placedSlots[colIdx] || '?';
               } else if (activityMode === 'first-sound' && !isSuccess && colIdx === 0) {
-                displayedLetter = '_';
+                displayedLetter = placedSlots[0] || '_';
               }
 
               return (
                 <div key={colIdx} className="stand-card-column">
                   <div className="golden-binder-ring" title="Golden spiral binder ring"></div>
 
-                  <div 
+                  <div
                     className="flipbook-card"
                     onClick={() => {
                       soundEngine.playClick();
                       onPlayAudio(ltr);
                     }}
-                    style={{ cursor: 'pointer' }}
+                    style={{
+                      cursor: 'pointer',
+                      outline: isSuccess && isHighlightedPattern ? '3px solid #2563EB' : 'none',
+                      boxShadow: isSuccess && isHighlightedPattern ? '0 0 0 4px rgba(37, 99, 235, 0.2)' : undefined
+                    }}
                     title={`Letter card for sound: ${ltr}`}
                   >
                     <div className="card-hole-cutout"></div>
 
                     <div className="letter-card-inner">
-                      <span 
+                      <span
                         className="letter-glyph-large"
-                        style={{ color: displayedLetter === '?' ? '#94A3B8' : ltrColor }}
+                        style={{ color: displayedLetter === '?' || displayedLetter === '_' ? '#94A3B8' : ltrColor }}
                       >
                         {displayedLetter}
                       </span>
                     </div>
 
                     <div className={`card-category-pill cat-pill-${tabTheme}`}>
-                      {tabLabel}
+                      {isSuccess && isHighlightedPattern ? `★ ${tabLabel}` : tabLabel}
                     </div>
                   </div>
                 </div>
@@ -758,10 +916,10 @@ export default function SoundGarden({
 
           </div>
 
-          {/* Integrated Mid-Stand Toolbar (Audio, Phonics & Articulation) */}
+          {/* Integrated Mid-Stand Toolbar (Step 3 Audio Model + Activity Level Switcher) */}
           <div className="stand-embedded-toolbar">
             <div className="toolbar-audio-group">
-              <button className="stand-audio-btn" onClick={handlePlayWord} title="Hear the full word pronunciation">
+              <button className="stand-audio-btn" onClick={handlePlayWord} title="Step 3: Hear the full word audio model">
                 <span>🔊</span> Listen Word
               </button>
               <button className="stand-audio-btn" onClick={handleSoundOut} title="Hear letter sounds one by one">
@@ -773,19 +931,19 @@ export default function SoundGarden({
                   soundEngine.playClick();
                   setSelectedPlacementImg(learningImages[currentWordData.imgIndex || 0]);
                 }}
-                title="View speech therapist tongue & lip placement diagram"
+                title="View optional lip & tongue placement guide"
               >
-                <span>👄</span> Mouth Placement Guide
+                <span>👄</span> Mouth Guide
               </button>
             </div>
 
             <div className="mode-toggle-pill">
-              <span style={{ fontSize: '0.82rem', color: 'var(--color-navy-muted)' }}>Level:</span>
+              <span style={{ fontSize: '0.82rem', color: 'var(--color-navy-muted)' }}>Activity:</span>
               <button
                 className={`theme-pill-btn ${activityMode === 'builder' ? 'active' : ''}`}
                 onClick={() => { soundEngine.playClick(); setActivityMode('builder'); }}
               >
-                All Letters
+                Build Word
               </button>
               <button
                 className={`theme-pill-btn ${activityMode === 'first-sound' ? 'active' : ''}`}
@@ -793,111 +951,180 @@ export default function SoundGarden({
               >
                 First Sound
               </button>
+              <button
+                className={`theme-pill-btn ${activityMode === 'sound-position' ? 'active' : ''}`}
+                onClick={() => { soundEngine.playClick(); setActivityMode('sound-position'); }}
+              >
+                🔍 Sound Position
+              </button>
             </div>
           </div>
 
-          {/* ------------------------------------------------------------------ */}
-          {/* 3. INTEGRATED LOWER SPELLING TRAY (SLOTS & LETTER BANK)            */}
-          {/* ------------------------------------------------------------------ */}
+          {/* 3. LOWER TRAY: SPELLING BUILDER OR OPTIONAL SOUND POSITION ACTIVITY */}
           <div className="stand-spelling-tray">
 
-            <div className="tray-section-title">
-              <span>🧩 Word Building Slots:</span>
-              <span style={{ fontSize: '0.85rem' }}>Tap a card to place or remove</span>
-            </div>
-
-            {/* Slots Row where cards snap in */}
-            <div className="spelling-slots-row">
-              {placedSlots.map((slotLetter, idx) => {
-                const isFilled = slotLetter !== null;
-                const tabColor = currentWordData.tabColors[idx] || 'teal';
-                const ltrColor = currentWordData.letterColors[idx] || '#0B847F';
-
-                return (
-                  <div
-                    key={idx}
-                    className={`spelling-slot-card ${isFilled ? 'filled' : 'empty-placeholder'}`}
-                    onClick={() => handleRemoveSlot(idx)}
-                    title={isFilled ? `Tap to return '${slotLetter}' to tray` : `Slot ${idx + 1}`}
-                  >
-                    {isFilled ? (
-                      <>
-                        <div className="card-hole-cutout" style={{ width: '8px', height: '8px', marginBottom: '0.2rem' }}></div>
-                        <span className="desk-tile-glyph" style={{ color: ltrColor }}>
-                          {slotLetter}
-                        </span>
-                        <span className={`desk-tile-tag cat-pill-${tabColor}`}>
-                          {currentWordData.tabs[idx] || 'Letter'}
-                        </span>
-                        {!isSuccess && <span className="slot-delete-cross" title="Remove">✕</span>}
-                      </>
-                    ) : (
-                      <span>•</span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Letter Cards on the Shelf */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--color-navy-muted, #55657E)' }}>
-                🗂️ Tap a letter card to slide it into the slot:
-              </span>
-
-              <div className="desk-letter-tiles-row">
-                {letterBank.map((letter, bIdx) => {
-                  const isUsed = usedBankIndices.has(bIdx);
-                  const isVowel = ['a', 'e', 'i', 'o', 'u', 'ee', 'oa', 'ai', 'ow', 'oy'].includes(letter);
-                  const letterColor = isVowel ? '#FF7A5C' : '#0B847F';
-                  const tabTheme = isVowel ? 'cat-pill-blue' : 'cat-pill-teal';
-
-                  return (
-                    <div
-                      key={bIdx}
-                      className={`desk-tile ${isUsed ? 'used' : ''}`}
-                      onClick={() => handleSelectBankCard(letter, bIdx)}
-                      title={isUsed ? `'${letter}' is already placed` : `Place '${letter}'`}
-                    >
-                      <div className="card-hole-cutout" style={{ width: '8px', height: '8px', marginBottom: '0.15rem' }}></div>
-                      <span className="desk-tile-glyph" style={{ color: letterColor }}>
-                        {letter}
-                      </span>
-                      <span className={`desk-tile-tag ${tabTheme}`}>
-                        {isVowel ? 'Vowel' : 'Consonant'}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Success Celebration Banner */}
-            {isSuccess && (
-              <div className="spelling-success-banner">
-                <div className="success-banner-content">
-                  <PipCompanion size="sm" state="celebrating" />
-                  <div>
-                    <h3 style={{ margin: '0 0 0.15rem 0', color: '#15803D', fontWeight: 900 }}>
-                      Word Complete! 🌟
-                    </h3>
-                    <p style={{ margin: 0, color: '#166534', fontSize: '0.92rem' }}>
-                      You built <strong>{currentWordData.word.toUpperCase()}</strong> with Pip!
-                    </p>
-                  </div>
+            {activityMode === 'sound-position' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem', alignItems: 'center', padding: '0.5rem 0' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <span style={{
+                    background: '#DBEAFE',
+                    color: '#1E40AF',
+                    padding: '0.28rem 0.85rem',
+                    borderRadius: '9999px',
+                    fontWeight: 900,
+                    fontSize: '0.78rem',
+                    textTransform: 'uppercase'
+                  }}>
+                    Optional Phonological Awareness Activity
+                  </span>
+                  <h4 style={{ margin: '0.5rem 0 0.2rem 0', fontSize: '1.3rem', color: 'var(--color-navy)', fontWeight: 900 }}>
+                    Where do you hear or see <strong>"{currentWordData.highlightPattern}"</strong> ({currentWordData.targetSoundLabel}) in <strong>"{currentWordData.word.toUpperCase()}"</strong>?
+                  </h4>
+                  <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-navy-muted)', fontWeight: 600 }}>
+                    Tap Beginning, Middle, or End:
+                  </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
-                  <span className="success-word-highlight">
-                    {currentWordData.emoji} {currentWordData.word}
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  {[
+                    { id: 'beginning', label: '🟢 Beginning (Start)', icon: '⬅️' },
+                    { id: 'middle', label: '🟡 Middle (Inside)', icon: '↔️' },
+                    { id: 'end', label: '🔵 End (Last)', icon: '➡️' }
+                  ].map(pos => {
+                    const isPicked = selectedPosition === pos.id;
+                    const isRight = isPicked && positionFeedback === 'correct';
+                    const isWrong = isPicked && positionFeedback === 'retry';
+                    return (
+                      <button
+                        key={pos.id}
+                        onClick={() => handleSelectPosition(pos.id)}
+                        style={{
+                          padding: '1rem 1.6rem',
+                          borderRadius: '18px',
+                          fontWeight: 900,
+                          fontSize: '1.05rem',
+                          cursor: 'pointer',
+                          border: isRight ? '3px solid #22C55E' : isWrong ? '3px solid #EF4444' : '2px solid var(--border-soft)',
+                          background: isRight ? '#DCFCE7' : isWrong ? '#FEE2E2' : '#FFFFFF',
+                          color: 'var(--color-navy)'
+                        }}
+                      >
+                        {pos.icon} {pos.label} {isRight && '✅'} {isWrong && '❌'}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="tray-section-title">
+                  <span>🧩 Step 4: Word Building Slots</span>
+                  <span style={{ fontSize: '0.85rem' }}>Tap a letter card below to place it, or tap a filled slot to remove it</span>
+                </div>
+
+                {/* Slots Row */}
+                <div className="spelling-slots-row">
+                  {placedSlots.map((slotLetter, idx) => {
+                    const isFilled = slotLetter !== null;
+                    const tabColor = currentWordData.tabColors[idx] || 'teal';
+                    const ltrColor = currentWordData.letterColors[idx] || '#0B847F';
+
+                    return (
+                      <div
+                        key={idx}
+                        className={`spelling-slot-card ${isFilled ? 'filled' : 'empty-placeholder'}`}
+                        onClick={() => handleRemoveSlot(idx)}
+                        title={isFilled ? `Tap to return '${slotLetter}' to tray` : `Slot ${idx + 1}`}
+                      >
+                        {isFilled ? (
+                          <>
+                            <div className="card-hole-cutout" style={{ width: '8px', height: '8px', marginBottom: '0.2rem' }}></div>
+                            <span className="desk-tile-glyph" style={{ color: ltrColor }}>
+                              {slotLetter}
+                            </span>
+                            <span className={`desk-tile-tag cat-pill-${tabColor}`}>
+                              {currentWordData.tabs[idx] || 'Letter'}
+                            </span>
+                            {!isSuccess && <span className="slot-delete-cross" title="Remove">✕</span>}
+                          </>
+                        ) : (
+                          <span>•</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Letter Cards on the Shelf */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--color-navy-muted, #55657E)' }}>
+                    🗂️ Tap a letter card to slide it into the word:
                   </span>
-                  <button
-                    className="btn-primary"
-                    onClick={handleNextWord}
-                    style={{ padding: '0.75rem 1.6rem', fontSize: '1rem', fontWeight: 900 }}
-                  >
-                    Next Word ➔
-                  </button>
+
+                  <div className="desk-letter-tiles-row">
+                    {letterBank.map((letter, bIdx) => {
+                      const isUsed = usedBankIndices.has(bIdx);
+                      const isVowel = ['a', 'e', 'i', 'o', 'u', 'ee', 'oa', 'ai', 'ow', 'oy', 'um'].includes(letter);
+                      const letterColor = isVowel ? '#FF7A5C' : '#0B847F';
+                      const tabTheme = isVowel ? 'cat-pill-blue' : 'cat-pill-teal';
+
+                      return (
+                        <div
+                          key={bIdx}
+                          className={`desk-tile ${isUsed ? 'used' : ''}`}
+                          onClick={() => handleSelectBankCard(letter, bIdx)}
+                          title={isUsed ? `'${letter}' is already placed` : `Place '${letter}'`}
+                        >
+                          <div className="card-hole-cutout" style={{ width: '8px', height: '8px', marginBottom: '0.15rem' }}></div>
+                          <span className="desk-tile-glyph" style={{ color: letterColor }}>
+                            {letter}
+                          </span>
+                          <span className={`desk-tile-tag ${tabTheme}`}>
+                            {letter.length > 1 ? 'Pattern' : isVowel ? 'Vowel' : 'Consonant'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* STEP 5, 6 & 7: COMPLETED WORD, HIGHLIGHTED SPELLING PATTERN & MEANING */}
+            {isSuccess && (
+              <div className="spelling-success-banner" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '0.85rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                  <div className="success-banner-content">
+                    <PipCompanion size="sm" state="celebrating" />
+                    <div>
+                      <h3 style={{ margin: '0 0 0.15rem 0', color: '#15803D', fontWeight: 900 }}>
+                        Step 7: Completed Word & Meaning! 🌟
+                      </h3>
+                      <p style={{ margin: 0, color: '#166534', fontSize: '0.96rem', fontWeight: 700 }}>
+                        <strong>{currentWordData.label}</strong> ({currentWordData.word}) — {currentWordData.meaning}
+                      </p>
+                      <p style={{ margin: '0.2rem 0 0 0', color: '#1E40AF', fontSize: '0.86rem', fontWeight: 800 }}>
+                        ✨ Highlighted Spelling Pattern: <strong>"{currentWordData.highlightPattern}"</strong> ({currentWordData.targetSoundLabel} at the <strong>{currentWordData.soundPosition}</strong>)
+                      </p>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.7rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <button
+                      className="btn-secondary"
+                      onClick={() => onPlayAudio(`${currentWordData.word}. ${currentWordData.meaning}`)}
+                      style={{ background: '#fff', padding: '0.6rem 1rem', fontSize: '0.86rem' }}
+                    >
+                      🔊 Hear Word & Meaning
+                    </button>
+                    <button
+                      className="btn-primary"
+                      onClick={handleNextWord}
+                      style={{ padding: '0.7rem 1.4rem', fontSize: '0.95rem', fontWeight: 900 }}
+                    >
+                      Next Word ➔
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -905,14 +1132,16 @@ export default function SoundGarden({
             {/* Action Buttons Row */}
             <div className="tray-action-controls">
               <div className="action-left-buttons">
-                <button
-                  className="btn-secondary"
-                  onClick={handleClearSlots}
-                  disabled={isSuccess || placedSlots.every(s => s === null)}
-                  style={{ padding: '0.55rem 1.1rem', fontSize: '0.88rem' }}
-                >
-                  🔄 Reset
-                </button>
+                {activityMode !== 'sound-position' && (
+                  <button
+                    className="btn-secondary"
+                    onClick={handleClearSlots}
+                    disabled={isSuccess || placedSlots.every(s => s === null)}
+                    style={{ padding: '0.55rem 1.1rem', fontSize: '0.88rem' }}
+                  >
+                    🔄 Reset Cards
+                  </button>
+                )}
 
                 <button
                   className="btn-secondary"
@@ -930,12 +1159,12 @@ export default function SoundGarden({
               </div>
 
               <div className="action-right-buttons">
-                {!isSuccess && (
+                {!isSuccess && activityMode !== 'sound-position' && (
                   <button
                     className="btn-primary"
                     onClick={() => validateSpelling(placedSlots)}
                     disabled={placedSlots.some(s => s === null)}
-                    style={{ padding: '0.75rem 2rem', fontSize: '1.02rem', fontWeight: 900 }}
+                    style={{ padding: '0.75rem 1.8rem', fontSize: '0.98rem', fontWeight: 900 }}
                   >
                     ✨ Check Word
                   </button>
@@ -943,10 +1172,18 @@ export default function SoundGarden({
 
                 <button
                   className="btn-secondary"
+                  onClick={onOpenSpeakPractice}
+                  style={{ padding: '0.55rem 1.1rem', fontSize: '0.86rem' }}
+                >
+                  🎙️ Optional: Listen & Practise Speech
+                </button>
+
+                <button
+                  className="btn-secondary"
                   onClick={handleNextWord}
                   style={{ padding: '0.55rem 1.2rem', fontSize: '0.88rem' }}
                 >
-                  Skip / Next ➔
+                  Next Word ➔
                 </button>
               </div>
             </div>
@@ -986,7 +1223,7 @@ export default function SoundGarden({
               }}>
                 <span style={{ fontSize: '1.5rem' }}>🔄</span>
                 <div>
-                  <strong>Almost there!</strong> Tap any card to replace it and try again!
+                  <strong>Gentle Retry:</strong> Tap any letter card in the slot to swap it and try again!
                 </div>
               </div>
             )}
@@ -995,13 +1232,11 @@ export default function SoundGarden({
 
         </div>
 
-        {/* ------------------------------------------------------------------ */}
-        {/* 4. MODAL: LIP & TONGUE PLACEMENT GUIDE (26 CLINICAL DIAGRAMS)      */}
-        {/* ------------------------------------------------------------------ */}
+        {/* 4. MODAL: LIP & TONGUE PLACEMENT GUIDE */}
         {selectedPlacementImg && (
           <div className="lightbox" onClick={() => setSelectedPlacementImg(null)}>
             <div className="placement-modal-card" onClick={e => e.stopPropagation()}>
-              <button 
+              <button
                 onClick={() => setSelectedPlacementImg(null)}
                 style={{
                   position: 'absolute',
@@ -1018,15 +1253,15 @@ export default function SoundGarden({
               </button>
 
               <h2 style={{ color: 'var(--color-navy, #1B2F4E)', margin: '0 0 0.4rem 0' }}>
-                👄 Articulation Placement Guide
+                👄 Optional Mouth & Tongue Visual Cue
               </h2>
               <p style={{ color: 'var(--color-navy-muted, #55657E)', fontSize: '0.92rem', margin: 0 }}>
-                Observe the lip and tongue positioning for <strong>{currentWordData.label}</strong> sounds.
+                Visual reference for <strong>{currentWordData.label}</strong> ({currentWordData.targetSoundLabel}).
               </p>
 
-              <img 
-                src={selectedPlacementImg} 
-                alt="Speech Articulation Diagram" 
+              <img
+                src={selectedPlacementImg}
+                alt="Speech Articulation Diagram"
                 className="placement-diagram-img"
               />
 
@@ -1039,12 +1274,12 @@ export default function SoundGarden({
                 fontSize: '0.88rem',
                 textAlign: 'left'
               }}>
-                🗣️ <strong>Therapy Note:</strong> Watch how the lips and tongue shape before the air flows out. Practice saying the sound gently with Pip in front of a mirror!
+                🗣️ <strong>Supportive Visual Cue:</strong> This diagram offers a general visual reference for lip and tongue placement during educator-guided practice.
               </div>
 
-              <button 
-                className="btn-primary" 
-                onClick={() => setSelectedPlacementImg(null)} 
+              <button
+                className="btn-primary"
+                onClick={() => setSelectedPlacementImg(null)}
                 style={{ marginTop: '1.2rem', width: '100%', padding: '0.8rem' }}
               >
                 Back to Flipbook
