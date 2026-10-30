@@ -22,6 +22,7 @@ import PipsAdventure from './modules/PipsAdventure';
 import { soundEngine } from './utils/soundEngine';
 import ConfettiCelebrationModal from './components/ConfettiCelebrationModal';
 import InactivitySessionSummaryModal from './components/InactivitySessionSummaryModal';
+import TeacherWorkspacePortal from './components/TeacherWorkspacePortal';
 
 export default function App() {
   // App persistent state
@@ -34,7 +35,8 @@ export default function App() {
 
   // Active student ID & data
   const [activeStudentId, setActiveStudentId] = useState(appState.currentStudentId || 'kuhendra');
-  const activeStudent = appState.students[activeStudentId] || appState.students.kuhendra;
+  const resolvedStudentId = appState.currentStudentId || activeStudentId || 'kuhendra';
+  const activeStudent = appState.students[resolvedStudentId] || appState.students.kuhendra;
 
   // Shared vocabulary word ID connecting modules
   const sharedWordId = appState.sharedVocabularyWordId || 'umbrella';
@@ -44,7 +46,7 @@ export default function App() {
   const [activeStudentFeature, setActiveStudentFeature] = useState('home');
 
   // Teacher navigation & state
-  const [activeTeacherFeature, setActiveTeacherFeature] = useState('students');
+  const [activeTeacherFeature, setActiveTeacherFeature] = useState('dashboard');
   const [selectedStudentForTeacher, setSelectedStudentForTeacher] = useState(null);
   const [newAssignmentInput, setNewAssignmentInput] = useState('');
   const [newPhraseInput, setNewPhraseInput] = useState('');
@@ -237,7 +239,43 @@ export default function App() {
       'what-do-i-need': 'aacCommunication',
       'speak-practise': 'speechModelPractice'
     };
+    const moduleLabelMap = {
+      'think-discover': 'Think & Discover',
+      'sound-garden': 'Sound Garden',
+      'sentence-connect': 'Sentence Treehouse (Conjunctions)',
+      'sentence-builder': 'Sentence Treehouse (Sentence Builder)',
+      'tenses-adventure': 'Sentence Treehouse (Tenses Adventure)',
+      'what-do-i-need': 'What Do I Need? (AAC Board)',
+      'speak-practise': 'Speak & Practise'
+    };
     grantReward(amount, message, domainMap[moduleId] || null);
+
+    setAppState(prev => {
+      const targetId = prev.currentStudentId || activeStudentId || 'kuhendra';
+      const student = prev.students[targetId] || prev.students.kuhendra;
+      const activeSupportsList = Object.entries(student.supports || {})
+        .filter(([, v]) => v)
+        .map(([k]) => k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()));
+      const newEntry = {
+        id: 'ah-' + Date.now(),
+        date: new Date().toISOString().slice(0, 10),
+        module: moduleLabelMap[moduleId] || moduleId,
+        activity: 'Interactive Practice Step',
+        detail: message,
+        supportsUsed: activeSupportsList,
+        category: domainMap[moduleId] || 'general'
+      };
+      return {
+        ...prev,
+        students: {
+          ...prev.students,
+          [targetId]: {
+            ...student,
+            activityHistory: [newEntry, ...(student.activityHistory || [])]
+          }
+        }
+      };
+    });
 
     setModulesTried(prev => {
       const updated = prev.includes(moduleId) ? prev : [...prev, moduleId];
@@ -1132,29 +1170,66 @@ export default function App() {
     </div>
   );
 
-  // 4. Teacher Dashboard (Enhanced with Learning Goals, Adjustable Supports & Skill-Specific Observations)
+  // 4. Teacher Dashboard (Speech & Language Classification Guide, Personalisation & Teacher Workspace)
+  const sharedVocabEntry = SHARED_VOCABULARY_BRIDGE.find(w => w.id === sharedWordId) || SHARED_VOCABULARY_BRIDGE[0];
+
+  const handleAssignSharedVocabToActiveStudent = (wordId) => {
+    const sw = SHARED_VOCABULARY_BRIDGE.find(w => w.id === wordId);
+    if (!sw) return;
+    setAppState(prev => {
+      const targetId = prev.currentStudentId || activeStudentId || 'kuhendra';
+      const st = prev.students[targetId] || prev.students.kuhendra;
+      return {
+        ...prev,
+        sharedVocabularyWordId: sw.id,
+        students: {
+          ...prev.students,
+          [targetId]: {
+            ...st,
+            assignedWord: sw.word,
+            assignedEmoji: sw.emoji,
+            assignedPhrase: sw.phrase,
+            assignedSentence: sw.modelSentence
+          }
+        }
+      };
+    });
+    setRewardPopup(`Assigned "${sw.word}" ${sw.emoji} to ${activeStudent.nickname}!`);
+    setTimeout(() => setRewardPopup(null), 2500);
+  };
+
   const renderTeacherDashboard = () => (
     <div className="dashboard-container">
       <aside className="sidebar">
         <div className="sidebar-logo"><span>🦜</span> SpeakUp</div>
         <nav className="sidebar-nav">
-          <p className="nav-heading">EDUCATOR MENU</p>
+          <p className="nav-heading">TEACHER WORKSPACE</p>
           <ul>
-            <li className={activeTeacherFeature === 'students' ? 'active' : ''} onClick={() => { setActiveTeacherFeature('students'); setSelectedStudentForTeacher(null); }}>
-              <span>📚</span> Student Learning Plans
+            <li className={activeTeacherFeature === 'dashboard' ? 'active' : ''} onClick={() => setActiveTeacherFeature('dashboard')}>
+              <span>📊</span> Workspace Overview
             </li>
-            <li className={activeTeacherFeature === 'planner' ? 'active' : ''} onClick={() => { setActiveTeacherFeature('planner'); setSelectedStudentForTeacher(null); }}>
-              <span>📅</span> Lesson Planner
+            <li className={activeTeacherFeature === 'exhibition' ? 'active' : ''} onClick={() => setActiveTeacherFeature('exhibition')}>
+              <span>🎓</span> 4 Exhibition Profiles
             </li>
-            <li className={activeTeacherFeature === 'reports' ? 'active' : ''} onClick={() => { setActiveTeacherFeature('reports'); setSelectedStudentForTeacher(null); }}>
-              <span>📊</span> Skill Observations
+            <li className={activeTeacherFeature === 'students' ? 'active' : ''} onClick={() => setActiveTeacherFeature('students')}>
+              <span>📁</span> Student Records & ILPs
             </li>
-            <li className={activeTeacherFeature === 'profile' ? 'active' : ''} onClick={() => { setActiveTeacherFeature('profile'); setSelectedStudentForTeacher(null); }}>
-              <span>👤</span> Educator Profile
+            <li className={activeTeacherFeature === 'guide' ? 'active' : ''} onClick={() => setActiveTeacherFeature('guide')}>
+              <span>📘</span> Speech & Language Guide
+            </li>
+            <li className={activeTeacherFeature === 'planner' ? 'active' : ''} onClick={() => setActiveTeacherFeature('planner')}>
+              <span>📅</span> Curriculum & Profile
             </li>
           </ul>
-          <p className="nav-heading">ACCOUNT</p>
+          <p className="nav-heading">ACCOUNT & PREVIEW</p>
           <ul>
+            <li onClick={() => {
+              setActiveStudentId(resolvedStudentId);
+              setCurrentView('student-dashboard');
+              setActiveStudentFeature('home');
+            }}>
+              <span>👦🏽</span> Preview Student View
+            </li>
             <li onClick={handleLogout}><span>🚪</span> Log Out</li>
           </ul>
         </nav>
@@ -1163,8 +1238,8 @@ export default function App() {
       <main className="main-content">
         <header className="dashboard-header">
           <div>
-            <h1>Educator & Therapist Personalisation Portal</h1>
-            <p>Configure individual learning goals, adjust visual/audio supports, and review non-diagnostic practice observations.</p>
+            <h1>Teacher Learning Management & Speech-Language Support Workspace</h1>
+            <p>Understand speech, language & communication needs, manage Individual Learning Plans (ILPs), and review explainable activity recommendations.</p>
           </div>
           <div className="user-profile">
             <div className="avatar">A</div>
@@ -1172,362 +1247,31 @@ export default function App() {
           </div>
         </header>
 
-        {/* Ethical & Demo Data Safeguard Banner */}
-        <div style={{
-          background: 'var(--color-teal-light, #DDF3F1)',
-          border: '1.5px solid var(--color-teal-border)',
-          borderRadius: '18px',
-          padding: '0.85rem 1.25rem',
-          marginBottom: '1.5rem',
-          fontSize: '0.86rem',
-          color: 'var(--color-navy)',
-          fontWeight: 700
-        }}>
-          🔒 <strong>Privacy & Educational Scope:</strong> All student profiles shown are fictional demonstration records. Activity logs track skill-specific practice observations (distinguishing receptive selection, spelling, sentence building, AAC, and optional speech practice) rather than clinical diagnosis.
-        </div>
+        <TeacherWorkspacePortal
+          appState={appState}
+          setAppState={setAppState}
+          activeStudent={activeStudent}
+          teacherTab={activeTeacherFeature}
+          setTeacherTab={setActiveTeacherFeature}
+          coreVocabulary={SHARED_VOCABULARY_BRIDGE}
+          sharedVocabEntry={sharedVocabEntry}
+          handleSelectSharedVocab={handleAssignSharedVocabToActiveStudent}
+          toggleStudentGoalId={(goalId) => handleToggleStudentGoal(activeStudent.id, goalId)}
+          toggleStudentSupport={(supKey) => handleToggleStudentSupport(activeStudent.id, supKey)}
+          onPreviewAsStudent={(stuId) => {
+            setActiveStudentId(stuId);
+            setAppState(prev => ({ ...prev, currentStudentId: stuId }));
+            setCurrentView('student-dashboard');
+            setActiveStudentFeature('home');
+          }}
+          playRealTTS={speakText}
+          showToast={(msg) => {
+            setRewardPopup(msg);
+            setTimeout(() => setRewardPopup(null), 2600);
+          }}
+        />
 
-        {activeTeacherFeature === 'students' && !selectedStudentForTeacher && (
-          <div>
-            <div className="section-header"><h3>Active Student Roster (Click a student to customize goals & supports)</h3></div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-              {Object.values(appState.students).map(st => (
-                <div key={st.id} className="student-roster-card" style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>{st.avatar}</div>
-                  <h4 style={{ fontSize: '1.3rem', color: 'var(--color-navy)', fontWeight: 900 }}>{st.name}</h4>
-                  <p style={{ color: 'var(--color-navy-muted)', fontSize: '0.84rem', fontWeight: 700 }}>{st.targetFocus}</p>
-                  <div style={{ margin: '0.5rem 0', fontSize: '0.85rem', color: 'var(--color-teal)', fontWeight: 800 }}>
-                    Target Word: {st.assignedWord} {st.assignedEmoji}
-                  </div>
-                  <div style={{ fontSize: '0.76rem', color: 'var(--color-navy-muted)', marginBottom: '1rem', fontWeight: 700 }}>
-                    {(st.selectedGoalIds || []).length} Active Learning Goals
-                  </div>
-                  <button className="btn-primary" style={{ width: '100%' }} onClick={() => setSelectedStudentForTeacher(st.id)}>
-                    Personalise Plan & Supports ➔
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Selected Student Detail View for Teacher */}
-        {activeTeacherFeature === 'students' && selectedStudentForTeacher && (
-          <div className="student-profile-view">
-            <button className="btn-back" onClick={() => setSelectedStudentForTeacher(null)}>
-              ← Back to Student Roster
-            </button>
-            {(() => {
-              const st = appState.students[selectedStudentForTeacher];
-              const supports = st.supports || {};
-              return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}>
-                  <div className="profile-header-card theme-teal-border">
-                    <div style={{ fontSize: '4rem' }}>{st.avatar}</div>
-                    <div>
-                      <h2>{st.name}'s Individual Learning Plan</h2>
-                      <p>Age Band: {st.ageBand} • Focus: {st.targetFocus}</p>
-                    </div>
-                  </div>
-
-                  {/* 1. TEACHER-SELECTED LEARNING GOALS */}
-                  <div style={{ background: 'var(--bg-card)', padding: '1.8rem', borderRadius: '24px', border: '1.5px solid var(--border-soft)' }}>
-                    <h3 style={{ margin: '0 0 0.4rem 0', color: 'var(--color-navy)', fontWeight: 900 }}>
-                      🎯 1. Individual Learning Goals
-                    </h3>
-                    <p style={{ margin: '0 0 1rem 0', color: 'var(--color-navy-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
-                      Select the specific communication and literacy goals appropriate for {st.nickname}:
-                    </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '0.75rem' }}>
-                      {LEARNING_GOAL_CATALOG.map(goal => {
-                        const isChecked = (st.selectedGoalIds || []).includes(goal.id);
-                        return (
-                          <button
-                            key={goal.id}
-                            onClick={() => handleToggleStudentGoal(st.id, goal.id)}
-                            style={{
-                              padding: '0.85rem 1rem',
-                              borderRadius: '16px',
-                              border: isChecked ? '2px solid var(--color-teal)' : '1.5px solid var(--border-soft)',
-                              background: isChecked ? 'var(--color-teal-light)' : 'var(--bg-canvas)',
-                              color: 'var(--color-navy)',
-                              fontWeight: 800,
-                              fontSize: '0.9rem',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              textAlign: 'left'
-                            }}
-                          >
-                            <span>{goal.icon} {goal.label}</span>
-                            <span>{isChecked ? '✅' : '⬜'}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* 2. ADJUSTABLE SUPPORTS */}
-                  <div style={{ background: 'var(--bg-card)', padding: '1.8rem', borderRadius: '24px', border: '1.5px solid var(--border-soft)' }}>
-                    <h3 style={{ margin: '0 0 0.4rem 0', color: 'var(--color-navy)', fontWeight: 900 }}>
-                      🛠️ 2. Adjustable Learning Supports
-                    </h3>
-                    <p style={{ margin: '0 0 1rem 0', color: 'var(--color-navy-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
-                      Customize visual, audio, and choice scaffolding across modules for {st.nickname}:
-                    </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
-                      {[
-                        { key: 'pictureCues', label: '🖼️ Picture Cues on Tiles' },
-                        { key: 'audioModels', label: '🔊 Spoken Audio Models' },
-                        { key: 'sentenceStarters', label: '💡 Optional Sentence Starters' },
-                        { key: 'wordBanks', label: '🗂️ Structured Word Banks' },
-                        { key: 'fewerChoices', label: '🎚️ Fewer Answer Choices (2 vs 3)' },
-                        { key: 'independentResponses', label: '✍️ Independent Construction Option' }
-                      ].map(sup => {
-                        const enabled = !!supports[sup.key];
-                        return (
-                          <button
-                            key={sup.key}
-                            onClick={() => handleToggleStudentSupport(st.id, sup.key)}
-                            style={{
-                              padding: '0.8rem 1rem',
-                              borderRadius: '16px',
-                              border: enabled ? '2px solid var(--color-teal)' : '1.5px solid var(--border-soft)',
-                              background: enabled ? 'var(--color-teal-light)' : 'var(--bg-canvas)',
-                              color: 'var(--color-navy)',
-                              fontWeight: 800,
-                              fontSize: '0.88rem',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center'
-                            }}
-                          >
-                            <span>{sup.label}</span>
-                            <span style={{ color: enabled ? 'var(--color-teal-hover)' : 'var(--color-navy-muted)' }}>
-                              {enabled ? 'ON' : 'OFF'}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* 3. ASSIGN SHARED OR CUSTOM TARGET WORD, PHRASE & SENTENCE */}
-                  <div style={{ background: 'var(--bg-card)', padding: '1.8rem', borderRadius: '24px', border: '1.5px solid var(--border-soft)' }}>
-                    <h3 style={{ margin: '0 0 0.4rem 0', color: 'var(--color-navy)', fontWeight: 900 }}>
-                      🔗 3. Assign Target Vocabulary (Word, Phrase & Sentence)
-                    </h3>
-                    <p style={{ color: 'var(--color-navy-muted)', marginBottom: '0.9rem', fontWeight: 600, fontSize: '0.9rem' }}>
-                      Current Assigned Target: <strong style={{ color: 'var(--color-teal)' }}>{st.assignedWord} {st.assignedEmoji}</strong> • Phrase: <em>"{st.assignedPhrase || `my ${st.assignedWord}`}"</em> • Sentence: <em>"{st.assignedSentence || `I use ${st.assignedWord}.`}"</em>
-                    </p>
-
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                      <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--color-navy-muted)', alignSelf: 'center' }}>
-                        Quick Assign Shared Bridge Word:
-                      </span>
-                      {SHARED_VOCABULARY_BRIDGE.map(sw => (
-                        <button
-                          key={sw.id}
-                          type="button"
-                          onClick={() => {
-                            setAppState(prev => ({
-                              ...prev,
-                              sharedVocabularyWordId: sw.id,
-                              students: {
-                                ...prev.students,
-                                [st.id]: {
-                                  ...st,
-                                  assignedWord: sw.word,
-                                  assignedEmoji: sw.emoji,
-                                  assignedPhrase: sw.phrase,
-                                  assignedSentence: sw.modelSentence
-                                }
-                              }
-                            }));
-                            setShowAssignSuccess(true);
-                            setTimeout(() => setShowAssignSuccess(false), 2500);
-                          }}
-                          style={{
-                            padding: '0.4rem 0.85rem',
-                            borderRadius: '9999px',
-                            border: '1.5px solid var(--color-teal-border)',
-                            background: 'var(--bg-canvas)',
-                            fontWeight: 800,
-                            fontSize: '0.84rem',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {sw.emoji} {sw.word}
-                        </button>
-                      ))}
-                    </div>
-
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        if (!newAssignmentInput.trim()) return;
-                        const w = newAssignmentInput.trim();
-                        setAppState(prev => ({
-                          ...prev,
-                          students: {
-                            ...prev.students,
-                            [st.id]: {
-                              ...st,
-                              assignedWord: w,
-                              assignedEmoji: '⭐',
-                              assignedPhrase: newPhraseInput.trim() || `my ${w.toLowerCase()}`,
-                              assignedSentence: newSentenceInput.trim() || `I use ${w.toLowerCase()}.`
-                            }
-                          }
-                        }));
-                        setNewAssignmentInput('');
-                        setNewPhraseInput('');
-                        setNewSentenceInput('');
-                        setShowAssignSuccess(true);
-                        setTimeout(() => setShowAssignSuccess(false), 3000);
-                      }}
-                      style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.8rem' }}
-                    >
-                      <input
-                        type="text"
-                        value={newAssignmentInput}
-                        onChange={e => setNewAssignmentInput(e.target.value)}
-                        placeholder="Target Word (e.g. Umbrella)"
-                        style={{ padding: '0.85rem', borderRadius: '14px', border: '1.5px solid var(--border-soft)' }}
-                      />
-                      <input
-                        type="text"
-                        value={newPhraseInput}
-                        onChange={e => setNewPhraseInput(e.target.value)}
-                        placeholder="Optional Phrase (e.g. big umbrella)"
-                        style={{ padding: '0.85rem', borderRadius: '14px', border: '1.5px solid var(--border-soft)' }}
-                      />
-                      <input
-                        type="text"
-                        value={newSentenceInput}
-                        onChange={e => setNewSentenceInput(e.target.value)}
-                        placeholder="Optional Sentence (e.g. I use an umbrella.)"
-                        style={{ padding: '0.85rem', borderRadius: '14px', border: '1.5px solid var(--border-soft)' }}
-                      />
-                      <button type="submit" className="btn-primary">
-                        Save Target Assignment
-                      </button>
-                    </form>
-                    {showAssignSuccess && (
-                      <div className="status-badge success" style={{ marginTop: '0.9rem', width: '100%', textAlign: 'center', padding: '0.7rem' }}>
-                        ✅ Target vocabulary & progression updated for {st.nickname}!
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 4. PRACTICE OBSERVATIONS & OPTIONAL RECORDINGS */}
-                  <div style={{ background: 'var(--bg-card)', padding: '1.8rem', borderRadius: '24px', border: '1.5px solid var(--border-soft)' }}>
-                    <h3 style={{ margin: '0 0 0.6rem 0', color: 'var(--color-navy)', fontWeight: 900 }}>
-                      📋 4. Practice Observations & Optional Audio Notes
-                    </h3>
-                    {appState.audioRecordings.filter(r => r.studentId === st.id).length === 0 ? (
-                      <p style={{ color: 'var(--color-navy-muted)', margin: 0 }}>
-                        No Speak & Practice notes submitted yet in this session for {st.nickname}.
-                      </p>
-                    ) : (
-                      <div className="inbox-grid">
-                        {appState.audioRecordings.filter(r => r.studentId === st.id).map(rec => (
-                          <div key={rec.id} className="inbox-card">
-                            <div className="inbox-card-header">
-                              <span className="target-badge">Target: {rec.targetWord}</span>
-                              <span className="date-badge">{rec.date}</span>
-                            </div>
-                            <p style={{ fontSize: '0.9rem', color: 'var(--color-navy-muted)' }}>
-                              <strong>Practice Note:</strong> {rec.transcript}
-                            </p>
-                            {rec.audioURL && (
-                              <audio controls src={rec.audioURL} className="audio-player small" style={{ width: '100%' }}></audio>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-        )}
-
-        {/* Lesson Planner */}
-        {activeTeacherFeature === 'planner' && (
-          <div className="materials-view">
-            <div className="materials-header">
-              <h2>📅 Lesson Planner</h2>
-              <p>Weekly learning goals and recommended cross-module sequences.</p>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              {appState.lessonPlans.map(plan => (
-                <div key={plan.id} style={{ background: 'var(--bg-card)', padding: '1.8rem', borderRadius: '24px', border: '1.5px solid var(--border-soft)' }}>
-                  <span className="status-badge success" style={{ marginBottom: '0.5rem' }}>{plan.week}</span>
-                  <h3 style={{ fontSize: '1.3rem', color: 'var(--color-navy)', margin: '0.3rem 0' }}>{plan.title}</h3>
-                  <p style={{ color: 'var(--color-navy-muted)', fontWeight: 600 }}><strong>Objectives:</strong> {plan.objectives}</p>
-                  <p style={{ color: 'var(--color-teal)', fontWeight: 700, marginTop: '0.4rem' }}><strong>Activities:</strong> {plan.activities}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Skill-Specific Practice Observations & Reports */}
-        {activeTeacherFeature === 'reports' && (
-          <div className="materials-view">
-            <div className="materials-header">
-              <h2>📊 Skill-Specific Practice Observations</h2>
-              <p>Tracks receptive WH selection, spelling/pattern building, sentence formulation, AAC communication, and audio model practice as distinct learning skills.</p>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1.5rem' }}>
-              {Object.values(appState.students).map(st => {
-                const obs = st.skillObservations || {};
-                return (
-                  <div key={st.id} style={{ background: 'var(--bg-card)', padding: '1.8rem', borderRadius: '24px', border: '1.5px solid var(--border-soft)' }}>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
-                      <span style={{ fontSize: '2.5rem' }}>{st.avatar}</span>
-                      <div>
-                        <h4 style={{ fontWeight: 900, color: 'var(--color-navy)', margin: 0 }}>{st.name}</h4>
-                        <small style={{ color: 'var(--color-navy-muted)', fontWeight: 700 }}>{st.targetFocus}</small>
-                      </div>
-                    </div>
-                    <div style={{ borderTop: '1px solid var(--border-soft)', paddingTop: '0.8rem', fontSize: '0.88rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                      <div>🔍 <strong>WH Receptive Selection:</strong> {obs.receptiveWh || 2} items</div>
-                      <div>🔤 <strong>Phonics & Spelling Building:</strong> {obs.phonicsSpelling || 2} words</div>
-                      <div>🌳 <strong>Sentence & Tense Construction:</strong> {obs.sentenceFormulation || 2} sentences</div>
-                      <div>⛵ <strong>AAC Functional Messages:</strong> {obs.aacCommunication || 2} messages</div>
-                      <div>🎙️ <strong>Audio Model & Speech Practice:</strong> {obs.speechModelPractice || 1} steps</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Teacher Profile */}
-        {activeTeacherFeature === 'profile' && (
-          <div className="teacher-profile-view">
-            <div className="profile-header-card theme-teal-border">
-              <div className="avatar large" style={{ width: '80px', height: '80px', fontSize: '2.5rem' }}>A</div>
-              <div>
-                <h2>{appState.teacher.name}</h2>
-                <p>{appState.teacher.role} • {appState.teacher.email}</p>
-                <div style={{ marginTop: '0.5rem' }}>
-                  <span className="status-badge success">🟢 Available for Teletherapy</span>
-                </div>
-              </div>
-            </div>
-            <div style={{ background: 'var(--bg-card)', padding: '2rem', borderRadius: '24px', border: '1.5px solid var(--border-soft)' }}>
-              <h4 style={{ fontWeight: 900, color: 'var(--color-navy)', marginBottom: '0.5rem' }}>Professional Bio</h4>
-              <p style={{ color: 'var(--color-navy-muted)', lineHeight: 1.6 }}>{appState.teacher.bio}</p>
-            </div>
-          </div>
-        )}
-
+        {rewardPopup && <div className="reward-popup">{rewardPopup}</div>}
       </main>
     </div>
   );
